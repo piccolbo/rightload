@@ -1,18 +1,24 @@
-from logging import error
+import feedgenerator
 import re
+from datetime import datetime
+from time import mktime
+
 
 def feed2XML(parsed_feed):
     "takes a parsed feed and generates an xml feed"
+
     def feedFactory(version):
         if version.upper().find("RSS") != -1:
             return feedgenerator.Rss201rev2Feed
         else:
             return feedgenerator.Atom1Feed
 
-    pf = parsed_feed.feed;
+    pf = parsed_feed.feed
     pf['title'] = pf.get('title', '')
     pf['link'] = pf.get('link', '')
-    feed = feedFactory(parsed_feed.version)(description = pf.get('description', ''), **dict(zip(map(str, pf.keys()), pf.values())))
+    feed = feedFactory(parsed_feed.version)(
+        description=pf.get('description', ''),
+        **dict(zip(map(str, pf.keys()), pf.values())))
     for e in parsed_feed.entries:
         e['title'] = e.get('title', '')
         e['link'] = e.get('link', '')
@@ -27,5 +33,12 @@ def feed2XML(parsed_feed):
                 e['author_link'] = e['author_detail']['href']
         if e.has_key('id'):
             e['unique_id'] = e['id']
-        feed.add_item(description = e.get('description', ''), **dict(zip(map(str, e.keys()), e.values())))
+        if e.has_key('published_parsed'):
+            e['pubdate'] = datetime.fromtimestamp(
+                mktime(e['published_parsed']))
+        if e.has_key('updated_parsed'):
+            e['pubdate'] = datetime.fromtimestamp(mktime(e['updated_parsed']))
+        feed.add_item(
+            description=e.get('description', ''),
+            **dict(zip(map(str, e.keys()), e.values())))
     return feed.writeString(parsed_feed.encoding)
