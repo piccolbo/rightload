@@ -37,18 +37,22 @@ class FailedExtraction(Exception):
 
 
 def entry2vec(entry):
-    vec = feature_store.get(entry.link)
-    if vec is None:
-        vec = text2vec(*entry2text(entry))
-        feature_store[entry.link] = vec
-    return vec
+    return url2vec(entry.link)
 
 
 def url2vec(url):
     feature_store = shove.Shove("lite:////{current_dir}/feature_store.sqlite".
                                 format(current_dir=os.getcwd()))
     vec = feature_store.get(url)
-    return vec if vec is not None else text2vec(*url2text(url))
+    if vec is None:
+        try:
+            text = url2text(url)
+        except FailedExtraction:
+            print "Failed Extraction for {url}".format(url=url)
+            return None
+        vec = text2vec(text)
+        feature_store[url] = vec
+    return vec
 
 
 def url2text(url):
@@ -59,17 +63,21 @@ def url2text(url):
             article = g.extract(raw_html=requests.get(url).content)
         except:
             article = Article()
-    return article.title, article.cleaned_text
+    text = article.title + "\n" + article.cleaned_text
+    if len(text) > 40:
+        return text
+    else:
+        raise FailedExtraction
 
 
+#unused
 def entry2text(entry):
     title, body = url2text(entry.link)
     return title or entry.title, body or g.extract(
         raw_html=entry.summary).cleaned_text
 
 
-def text2vec(title, body):
-    text = title + "\n" + body
+def text2vec(text):
     sentences = sent_detector.tokenize(
         text.strip())[:50]  #limit to cap latency
     # infersent.build_vocab(sentences, tokenize=True)
