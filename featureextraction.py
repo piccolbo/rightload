@@ -9,7 +9,6 @@ import shove
 import torch
 from warnings import warn
 
-feature_store = shove.Shove("simple://")
 sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
 
 #alternate infersent load method based on https://stackoverflow.com/questions/42703500/best-way-to-save-a-trained-model-in-pytorch as chdir doesn't work in flask
@@ -46,6 +45,8 @@ def entry2vec(entry):
 
 
 def url2vec(url):
+    feature_store = shove.Shove("lite:////{current_dir}/feature_store.sqlite".
+                                format(current_dir=os.getcwd()))
     vec = feature_store.get(url)
     return vec if vec is not None else text2vec(*url2text(url))
 
