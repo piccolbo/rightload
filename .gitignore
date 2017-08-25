@@ -2,3 +2,5 @@
 InferSent/
 
 *.pickle
+
+*.sqlite

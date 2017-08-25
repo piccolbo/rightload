@@ -1,12 +1,13 @@
+from InferSent.encoder import models as im
 from goose import Goose
 from goose.article import Article
 import nltk
+from numpy import resize
 import os
 import requests
-import torch
-from InferSent.encoder import models as im
-from warnings import warn
 import shove
+import torch
+from warnings import warn
 
 feature_store = shove.Shove("simple://")
 sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
