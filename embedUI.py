@@ -1,5 +1,5 @@
 from flask import request
-
+import math
 
 def feedbackurl(entry, well_spent):
     return ("http://" + request.host + "/learn/" +
@@ -9,6 +9,8 @@ def feedbackurl(entry, well_spent):
 def is_long(text):
     return len(text) > 1000
 
+def sigmoid(x):
+    return 1/(1+ math.exp(-x))
 
 def embedUI_entry(entry, score):
     bar = ('<p style="BACKGROUND-COLOR: #BBD9EE">' + (
@@ -25,8 +27,8 @@ def embedUI_entry(entry, score):
         entry['content'][0].value = bar + content + (bar if len(content) > 1000\
                                                      else '')
     if entry.has_key('title'):
-        entry['title'] = u"{score:.2f}|{title}".format(
-            score=score, title=entry['title'])
+        entry['title'] = u"{sigscore:.2f} |{score:.2f} | {title}".format(
+            sigscore=sigmoid(score), score = score, title=entry['title'])
     return entry
 
 
