@@ -2,40 +2,43 @@ import copy
 from embedUI import embedUI
 from feed2XML import feed2XML
 import feedcache
-from flask import request, Response
-from ml import score_feed
+from flask import request, Response, redirect
+from ml import score_feed, store_unlabelled
 import shove
 from werkzeug.http import is_hop_by_hop_header
 
 fc = feedcache.Cache(shove.Shove("simple://"))  #default timetolive = 300
 
 
-def proxy(url):
+def proxy(url, training_db, classifier_db):
     if request.method == 'GET':
-        print(url, request.query_string)
         parsed_feed = fc.fetch(
-            url + '?' + request.query_string, force_update = True)  #defaults: force_update = False, offline = False
+            '?'.join(filter(None, [url, request.query_string])),
+            force_update=False
+        )  #defaults: force_update = False, offline = False
 
         #return content
         status = parsed_feed.get('status', 404)
         if status >= 400:  #deal with errors
             response = ("External error", status, {})
         elif status >= 300:  #deal with redirects
-            response = ("", status, dict(Location="feed/{url}".format(
-                url=parsed_feed.href)))  #TODO pass also query string here
+            return redirect("/feed/{reurl}".format(reurl=parsed_feed.href))
         else:
             etag = request.headers.get('IF_NONE_MATCH')
             modified = request.headers.get('IF_MODIFIED_SINCE')
-            if (etag and etag == parsed_feed.get('etag')) or (
-                    modified and modified == parsed_feed.get('modified')):
-                response = ("", 304, {})
+            if False:
+                pass
+            # if (etag and etag == parsed_feed.get('etag')) or (
+            #         modified and modified == parsed_feed.get('modified')):
+            #     response = ("", 304, {})
             else:
                 if not parsed_feed['bozo']:
                     parsed_feed = copy.deepcopy(
                         parsed_feed
                     )  #if it's bozo copy fails and copy is not cached, so we skip
                     # deepcopy needed to avoid side effects on cache
-                response = (process(parsed_feed), 200, {})
+                response = (process(parsed_feed, training_db, classifier_db),
+                            200, {})
         if parsed_feed.has_key('headers'):  #some header rinsing
             for k, v in parsed_feed.headers.iteritems():
                 # TODO: seems to work with all the hop by hop  headers unset or to default values, need to look into this
@@ -49,6 +52,8 @@ def proxy(url):
         return ("POST not allowed for feeds", 405, {})
 
 
-def process(parsed_feed):
-    score = score_feed(parsed_feed) if (len(parsed_feed.entries) > 0) else []
+def process(parsed_feed, training_db, classifier_db):
+    # store_unlabelled(url, training_db) #only for semisupervised
+    score = score_feed(
+        parsed_feed, classifier_db) if (len(parsed_feed.entries) > 0) else []
     return feed2XML(embedUI(parsed_feed, score))
