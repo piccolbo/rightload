@@ -1,11 +1,13 @@
+import BeautifulSoup as bs
 from InferSent.encoder import models as im
 from goose import Goose
 from goose.article import Article
 import nltk
 from numpy import resize
 import os
+import re
 import requests
-import shove
+from sklearn.externals import joblib
 import torch
 from warnings import warn
 
@@ -27,7 +29,7 @@ infersent.load_state_dict(
         map_location=lambda storage, loc: storage))
 #saved with torch.save(infersent.state_dict(), "InferSent/encoder/infersent.allnli.state.pickle")
 infersent.set_glove_path('InferSent/dataset/GloVe/glove.840B.300d.txt')
-infersent.build_vocab_k_words(K=100000)
+infersent.build_vocab_k_words(K=1)
 
 g = Goose(dict(enable_image_fetching=False))
 
@@ -36,52 +38,68 @@ class FailedExtraction(Exception):
     pass
 
 
-def entry2vec(entry):
-    return url2vec(entry.link)
+u2v = joblib.Memory(cachedir="url2vec", verbose=0)
 
 
-def url2vec(url):
-    feature_store = shove.Shove("lite:////{current_dir}/feature_store.sqlite".
-                                format(current_dir=os.getcwd()))
-    vec = feature_store.get(url)
-    if vec is None:
-        try:
-            text = url2text(url)
-        except FailedExtraction:
-            print "Failed Extraction for {url}".format(url=url)
-            return None
-        vec = text2vec(text)
-        feature_store[url] = vec
-    return vec
+@u2v.cache(ignore=['entry'])
+def url2vec(url, entry=None):
+    try:
+        return text2vec(url2text(url))
+    except:
+        #TODO: log exception
+        if entry is not None:
+            text2vec(entry2text(entry))
+        else:
+            raise
+
+
+def goose_extract(**kwargs):
+    article = g.extract(**kwargs)
+    text = article.title + "\n" + article.cleaned_text
+    if len(text) < 200:
+        raise FailedExtraction
+    else:
+        return text
+
+
+def soup_extract(raw_html):
+    soup = bs.BeautifulSoup(
+        raw_html, convertEntities=bs.BeautifulSoup.ALL_ENTITIES)
+    return " ".join([
+        x for x in soup.findAll(text=True)
+        if x.parent.name not in
+        ['style', 'script', 'head', 'title', 'meta', '[document]']
+        and len(x) > 1
+    ])
 
 
 def url2text(url):
     try:
-        article = g.extract(url=url)
+        text = goose_extract(url=url)
     except:
         try:
-            article = g.extract(raw_html=requests.get(url).content)
+            raw_html = requests.get(url).content
+            text = goose_extract(raw_html=raw_html)
         except:
-            article = Article()
-    text = article.title + "\n" + article.cleaned_text
-    if len(text) > 40:
-        return text
-    else:
-        raise FailedExtraction
+            text = soup_extract(raw_html)
+            if len(text) < 40:
+                raise FailedExtraction
+    return text
 
 
-#unused
 def entry2text(entry):
-    title, body = url2text(entry.link)
-    return title or entry.title, body or g.extract(
-        raw_html=entry.summary).cleaned_text
+    try:
+        return url2text(entry.link)
+    except:
+        return entry.title + ". " + g.extract(
+            raw_html=entry.summary).cleaned_text
 
 
 def text2vec(text):
     sentences = sent_detector.tokenize(
-        text.strip())[:50]  #limit to cap latency
-    # infersent.build_vocab(sentences, tokenize=True)
+        text.strip())[:100]  #limit to cap latency
+    infersent.update_vocab(sentences, tokenize=True)
     if sentences:
-        return infersent.encode(sentences, tokenize=True).max(axis=0)
+        return infersent.encode(sentences, tokenize=True)
     else:
         raise FailedExtraction
