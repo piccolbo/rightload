@@ -66,7 +66,8 @@ def get_nested(nested_dict, path):
 
 def map_entry_structure(fmap, entry):
     return {
-        arg: reduce(lambda x, y: x or unicode(get_nested(entry, y)) or default,
-                    paths, u'')
+        arg: unicode(
+            reduce(lambda x, y: x or get_nested(entry, y) or default, paths,
+                   u'') or '')
         for arg, (paths, default) in fmap.iteritems() if paths is not None
     }
