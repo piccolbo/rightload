@@ -29,7 +29,6 @@ def font(color, text):
 
 def embedUI_entry(entry, score):
     link = entry.link
-    print score
     good_link = a(
         href=feedbackurl(link=link, well_spent=True),
         target="_top",
