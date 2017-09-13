@@ -43,8 +43,8 @@ def url2vec_or_None(url, feature_db):
         return None
 
 
-    classifier = lm.LogisticRegressionCV(n_jobs=-1)
 def learn(training_db, classifier_db, feature_db):
+    classifier = lm.LogisticRegressionCV()
     Xy = [(X, [int(feedback)] * X.shape[0])
           for X, feedback in [(url2vec_or_None(url, feature_db), feedback)
                               for url, feedback in training_db.iteritems()]
