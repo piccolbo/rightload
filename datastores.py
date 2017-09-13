@@ -3,12 +3,12 @@ from os.path import basename
 import shove
 
 
-
 def get_shove_db(path):
     db = getattr(g, '_' + basename(path), None)
     if db is None:
         db = g._database = shove.Shove('lite://' + path)
     return db
+
 
 def classifier_db():
     return get_shove_db('classifier.sqlite')
@@ -18,7 +18,8 @@ def training_db():
     return get_shove_db('training.sqlite')
 
 
-
+def feature_db():
+    return get_shove_db('feature.sqlite')
 
 
 # tear down example
