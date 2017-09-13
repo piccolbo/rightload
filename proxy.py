@@ -10,7 +10,7 @@ from werkzeug.http import is_hop_by_hop_header
 fc = feedcache.Cache(shove.Shove("simple://"))  #default timetolive = 300
 
 
-def proxy(url, training_db, classifier_db):
+def proxy(url, training_db, classifier_db, feature_db):
     if request.method == 'GET':
         parsed_feed = fc.fetch(
             '?'.join(filter(None, [url, request.query_string])),
@@ -37,7 +37,7 @@ def proxy(url, training_db, classifier_db):
                         parsed_feed
                     )  #if it's bozo copy fails and copy is not cached, so we skip
                     # deepcopy needed to avoid side effects on cache
-                response = (process(parsed_feed, training_db, classifier_db),
+                response = (process(parsed_feed, classifier_db, feature_db),
                             200, {})
         if parsed_feed.has_key('headers'):  #some header rinsing
             for k, v in parsed_feed.headers.iteritems():
@@ -52,8 +52,8 @@ def proxy(url, training_db, classifier_db):
         return ("POST not allowed for feeds", 405, {})
 
 
-def process(parsed_feed, training_db, classifier_db):
+def process(parsed_feed, classifier_db, feature_db):
     # store_unlabelled(url, training_db) #only for semisupervised
     score = score_feed(
-        parsed_feed, classifier_db) if (len(parsed_feed.entries) > 0) else []
+        parsed_feed, classifier_db, feature_db) if (len(parsed_feed.entries) > 0) else []
     return feed2XML(embedUI(parsed_feed, score))
