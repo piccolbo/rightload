@@ -32,6 +32,7 @@ def feed2XML(parsed_feed):
         feed.add_item(**add_args)
     return feed.writeString(parsed_feed.encoding)
 
+
 # this dict contains an entry for each entry.add_item unicode argument (dates
 # are treated separately). Each value is a tuple with a list of paths and a
 # default value for the argument. Each path is a tuple of keys used to access
@@ -59,8 +60,8 @@ field_map = dict(
 
 def get_nested(nested_dict, path):
     if isinstance(path, str):
-        path = (path,)
-    return reduce(lambda x,y: x.get(y, None) or {}, path, nested_dict)
+        path = (path, )
+    return reduce(lambda x, y: x.get(y, {}), path, nested_dict)
 
 
 def map_entry_structure(fmap, entry):
