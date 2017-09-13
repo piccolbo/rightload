@@ -7,7 +7,6 @@ from numpy import resize
 import os
 import re
 import requests
-from sklearn.externals import joblib
 import torch
 from warnings import warn
 
@@ -38,19 +37,23 @@ class FailedExtraction(Exception):
     pass
 
 
-u2v = joblib.Memory(cachedir="url2vec", verbose=0)
-
-
-@u2v.cache(ignore=['entry'])
-def url2vec(url, entry=None):
-    try:
-        return text2vec(url2text(url))
-    except:
-        #TODO: log exception
-        if entry is not None:
-            text2vec(entry2text(entry))
-        else:
-            raise
+def url2vec(url, feature_db, entry=None):
+    if feature_db.get(url) is not None:
+        return feature_db[url]
+    else:
+        print("Feat extraction: {url}".format(url=url))
+        try:
+            retval = text2vec(url2text(url))
+        except:
+            warn(
+                "Can't extract from entry.link. Falling back to entry content")
+            if entry is not None:
+                retval = text2vec(entry2text(entry))
+            else:
+                raise
+        feature_db[url] = retval
+        feature_db.sync()
+        return retval
 
 
 def goose_extract(**kwargs):

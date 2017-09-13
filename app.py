@@ -1,6 +1,6 @@
 #ingredients:   tinydb joblib.Memory
 from flask import Flask
-from datastores import training_db, classifier_db
+from datastores import training_db, classifier_db, feature_db
 import ml
 import proxy as xy
 from werkzeug.contrib.profiler import ProfilerMiddleware
@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route('/feed/<path:url>')
 def feed(url):
-    return xy.proxy(url, training_db(), classifier_db())
+    return xy.proxy(url, training_db(), classifier_db(), feature_db())
 
 
 @app.route('/feedback/<feedback>/<path:url>')
@@ -22,7 +22,7 @@ def feedback(feedback, url):
 
 @app.route('/learn')
 def learn():
-    ml.learn(training_db(), classifier_db())
+    ml.learn(training_db(), classifier_db(), feature_db())
     return ("Done", 204, {})
 
 
