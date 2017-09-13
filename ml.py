@@ -33,6 +33,7 @@ def store_feedback(feedback, url, training_db):
 def store_unlabelled(url, training_db):
     if not training_db.has_key[url]:
         training_db[url] = None
+        training_db.sync()
 
 
 def url2vec_or_None(url, feature_db):
