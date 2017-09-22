@@ -1,57 +1,74 @@
-from featureextraction import url2vec, FailedExtraction
-import numpy
+from feature_extraction import url2vec
+from collections import namedtuple
+from content_extraction import FailedExtraction
+from datastores import training_db, model_db
+from debug import spy
+from flask import g
+import numpy as np
+import os
 import sklearn.linear_model as lm
 import sklearn as sk
-from sklearn.externals import joblib
+from time import sleep
 import traceback
 from warnings import warn
 
-user = 'piccolbo@gmail.com'
+Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
 
-def score_entry(entry, classifier_db, feature_db):
+def classifier():
+    attr_name = "_classifier"
+    cl = getattr(g, attr_name, None)
+    if cl is None:
+        cl = model_db().get("user", lm.LogisticRegression())
+        setattr(g, attr_name, cl)
+    return cl
+
+
+def score_entry(entry):
     try:
-        X = url2vec(entry.link, feature_db, entry)
-        probs = classifier_db[user].predict_proba(X=X)
-        return probs[:, 1].mean()
+        X = url2vec(entry.link, entry)
+        probs = classifier().predict_proba(X=X)[:, 1]
+        #implicit feedback: if not overridden we assume prediction correct
+        store_feedback(
+            url=entry.link, feedback=probs.mean() > 0.5, explicit=False)
+        return probs
     except Exception, e:
         warn("Failed Scoring")
         warn(entry.link)
         warn(traceback.format_exc())
-        return 0.5
+        raise
 
 
-def score_feed(parsed_feed, classifier_db, feature_db):
-    return [score_entry(e, classifier_db, feature_db) for e in parsed_feed.entries]
+def score_feed(parsed_feed):
+    return [score_entry(e) for e in parsed_feed.entries]
 
 
-def store_feedback(feedback, url, training_db):
-    training_db[url] = feedback
-    training_db.sync()
+def store_feedback(url, feedback, explicit):
+    #can only override explicit with explicit
+    if not explicit and training_db().get(url) is not None and \
+        training_db()[url].explicit:
+        return
+    training_db()[url] = Feedback(feedback=feedback, explicit=explicit)
+    training_db().sync()
 
 
-def store_unlabelled(url, training_db):
-    if not training_db.has_key[url]:
-        training_db[url] = None
-        training_db.sync()
-
-
-def url2vec_or_None(url, feature_db):
+def url2vec_or_None(url):
     try:
-        return url2vec(url, feature_db)
+        return url2vec(url)
     except:
         return None
 
 
-def learn(training_db, classifier_db, feature_db):
-    classifier = lm.LogisticRegressionCV()
+def learn():
     Xy = [(X, [int(feedback)] * X.shape[0])
-          for X, feedback in [(url2vec_or_None(url, feature_db), feedback)
-                              for url, feedback in training_db.iteritems()]
+          for X, feedback in [(url2vec_or_None(url), feedback)
+                              for url, (feedback,
+                                        _) in training_db().iteritems()]
           if X is not None]
-    X = numpy.concatenate([X_ for X_, _ in Xy], axis=0)
-    y = numpy.concatenate([y_ for _, y_ in Xy], axis=0)
-    classifier.fit(X=X, y=y)
-    warn("Classifier Score: {score}".format(score=classifier.score(X=X, y=y)))
-    classifier_db[user] = classifier
-    classifier_db.sync()
+    X = np.concatenate([X_ for X_, _ in Xy], axis=0)
+    y = np.concatenate([y_ for _, y_ in Xy], axis=0)
+    classifier().fit(X=X, y=y)
+    print "Classifier Score: {score}".format(score=classifier().score(
+        X=X, y=y))
+    model_db()["user"] = classifier()
+    model_db().sync()

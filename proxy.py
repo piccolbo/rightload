@@ -3,14 +3,14 @@ from embedUI import embedUI
 from feed2XML import feed2XML
 import feedcache
 from flask import request, Response, redirect
-from ml import score_feed, store_unlabelled
+from ml import score_feed
 import shove
 from werkzeug.http import is_hop_by_hop_header
 
 fc = feedcache.Cache(shove.Shove("simple://"))  #default timetolive = 300
 
 
-def proxy(url, training_db, classifier_db, feature_db):
+def proxy(url):
     if request.method == 'GET':
         parsed_feed = fc.fetch(
             '?'.join(filter(None, [url, request.query_string])),
@@ -37,8 +37,7 @@ def proxy(url, training_db, classifier_db, feature_db):
                         parsed_feed
                     )  #if it's bozo copy fails and copy is not cached, so we skip
                     # deepcopy needed to avoid side effects on cache
-                response = (process(parsed_feed, classifier_db, feature_db),
-                            200, {})
+                response = (process(parsed_feed), 200, {})
         if parsed_feed.has_key('headers'):  #some header rinsing
             for k, v in parsed_feed.headers.iteritems():
                 # TODO: seems to work with all the hop by hop  headers unset or to default values, need to look into this
@@ -52,8 +51,6 @@ def proxy(url, training_db, classifier_db, feature_db):
         return ("POST not allowed for feeds", 405, {})
 
 
-def process(parsed_feed, classifier_db, feature_db):
-    # store_unlabelled(url, training_db) #only for semisupervised
-    score = score_feed(
-        parsed_feed, classifier_db, feature_db) if (len(parsed_feed.entries) > 0) else []
+def process(parsed_feed):
+    score = score_feed(parsed_feed) if (len(parsed_feed.entries) > 0) else []
     return feed2XML(embedUI(parsed_feed, score))
