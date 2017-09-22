@@ -4,6 +4,13 @@ from datastores import training_db, classifier_db, feature_db
 import ml
 import proxy as xy
 from werkzeug.contrib.profiler import ProfilerMiddleware
+import sys
+import trace
+
+# create a Trace object, telling it what to ignore, and whether to
+# do tracing or line-counting or both.
+tracer = trace.Trace(
+    ignoredirs=[sys.prefix, sys.exec_prefix], trace=1, count=0)
 
 app = Flask(__name__)
 
