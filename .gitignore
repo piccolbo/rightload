@@ -1,8 +1,6 @@
 *.pyc
 InferSent/
-
 *.pickle
-
 *.sqlite
-
-url2vec/*
+content-cache
+feature-cache
