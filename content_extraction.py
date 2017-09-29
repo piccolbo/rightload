@@ -2,9 +2,7 @@ from boilerpipe.extract import Extractor
 from joblib import Memory
 import numpy as np
 import requests
-import requests_cache
 
-requests_cache.install_cache('page-cache', expire_after=60 * 60 * 24 * 10)
 
 memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**8)
 
