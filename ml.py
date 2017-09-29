@@ -15,20 +15,29 @@ from warnings import warn
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
 
-def classifier():
-    attr_name = "_classifier"
-    cl = getattr(g, attr_name, None)
-    if cl is None:
-        cl = model_db().get("user", lm.LogisticRegression())
-        setattr(g, attr_name, cl)
-    return cl
+_model_attr_name = "_model"
+
+def _set_model(model):
+    setattr(g, _model_attr_name, model)
+    model_db()["user"] = model
+    model_db().sync()
+
+
+def _get_model():
+    model = getattr(g, _model_attr_name, None)
+    if model is None:
+        model = model_db().get("user", None)
+        if model is None:
+            model = _new_model()
+        _set_model(model)
+    return model
 
 
 
 def _score_entry(entry):
     try:
         X = url2vec(entry.link, entry)
-        probs = classifier().predict_proba(X=X)[:, 1]
+        probs = _get_model().predict_proba(X=X)[:, 1]
         #implicit feedback: if not overridden we assume prediction correct
         store_feedback(
             url=entry.link, feedback=probs.mean() > 0.5, explicit=False)
@@ -68,8 +77,11 @@ def learn():
           if X is not None]
     X = np.concatenate([X_ for X_, _ in Xy], axis=0)
     y = np.concatenate([y_ for _, y_ in Xy], axis=0)
-    classifier().fit(X=X, y=y)
-    print "Classifier Score: {score}".format(score=classifier().score(
-        X=X, y=y))
-    model_db()["user"] = classifier()
-    model_db().sync()
+    model = _new_model()
+    model.fit(X=X, y=y)
+
+    _set_model(model)
+
+    msg = "Classifier Score: {score}".format(score=model.score(X=X, y=y))
+    print msg
+    return msg
