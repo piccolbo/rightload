@@ -33,6 +33,9 @@ def _get_model():
     return model
 
 
+def _new_model():
+    return lm.LogisticRegression(class_weight='balanced', solver = "saga")
+
 
 def _score_entry(entry):
     try:
