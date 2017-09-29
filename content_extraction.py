@@ -42,13 +42,17 @@ def url2html(url, entry=None):
 
 @_memory.cache(ignore=["entry"])
 def url2text(url, entry=None):
-    try:
+    try:  #scrape url
         text = _scrape(url=url).getText()
         if len(text) < 40:
             raise FailedExtraction
-    except:
-        text = (entry.title or '') + "." + (_scrape(html=entry_content(entry)).getText() or '')
-        assert(text)
+    except:  # scrape entry
+        try:  # scrape entry content
+            entry_content = _scrape(html=_get_entry_content(entry)).getText()
+        except:
+            entry_content = ''
+        text = (entry.title or '') + "." + (entry_content or '')
+    assert (text)
     return text
 
 
