@@ -9,7 +9,7 @@ import torch
 from traceback import print_exc
 from warnings import warn
 
-sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+_sent_detector = nltk_load('tokenizers/punkt/english.pickle')
 
 #alternate infersent load method based on https://stackoverflow.com/questions/42703500/best-way-to-save-a-trained-model-in-pytorch as chdir doesn't work in flask
 _config = dict(
@@ -43,7 +43,7 @@ def text2sentences(text):
 
 def _text2vec(text, max_sentences=100):
     sentences = text2sentences(text)[:max_sentences]  #limit to cap latency
-    infersent.update_vocab(sentences, tokenize=True)
+    _infersent.update_vocab(sentences, tokenize=True)
     if sentences:
         return _infersent.encode(sentences, tokenize=True)
     else:
