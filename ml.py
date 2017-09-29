@@ -24,7 +24,8 @@ def classifier():
     return cl
 
 
-def score_entry(entry):
+
+def _score_entry(entry):
     try:
         X = url2vec(entry.link, entry)
         probs = classifier().predict_proba(X=X)[:, 1]
@@ -40,7 +41,7 @@ def score_entry(entry):
 
 
 def score_feed(parsed_feed):
-    return [score_entry(e) for e in parsed_feed.entries]
+    return [_score_entry(e) for e in parsed_feed.entries]
 
 
 def store_feedback(url, feedback, explicit):
@@ -52,7 +53,7 @@ def store_feedback(url, feedback, explicit):
     training_db().sync()
 
 
-def url2vec_or_None(url):
+def _url2vec_or_None(url):
     try:
         return url2vec(url)
     except:
@@ -61,7 +62,7 @@ def url2vec_or_None(url):
 
 def learn():
     Xy = [(X, [int(feedback)] * X.shape[0])
-          for X, feedback in [(url2vec_or_None(url), feedback)
+          for X, feedback in [(_url2vec_or_None(url), feedback)
                               for url, (feedback,
                                         _) in training_db().iteritems()]
           if X is not None]

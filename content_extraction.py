@@ -26,7 +26,7 @@ def _scrape(url=None, html=None):
             html=requests.get(url).content)
 
 
-@memory.cache(ignore=["entry"])
+@_memory.cache(ignore=["entry"])
 def url2html(url, entry=None):
     try:
         html = _scrape(url=url).getHTML()
@@ -37,7 +37,7 @@ def url2html(url, entry=None):
     return html
 
 
-@memory.cache(ignore=["entry"])
+@_memory.cache(ignore=["entry"])
 def url2text(url, entry=None):
     try:
         text = _scrape(url=url).getText()

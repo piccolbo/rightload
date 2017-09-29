@@ -22,7 +22,7 @@ def feed2XML(parsed_feed):
         description=pf.get('description', u''),
         **dict(zip(map(str, pf.keys()), pf.values())))
     for e in parsed_feed.entries:
-        add_args = map_entry_structure(field_map, e)
+        add_args = _map_entry_structure(_field_map, e)
         if e.has_key('published_parsed'):
             add_args['pubdate'] = datetime.fromtimestamp(
                 mktime(e['published_parsed']))
@@ -42,7 +42,7 @@ def feed2XML(parsed_feed):
 # This mapping is the result of trial and error and will most likely have to be
 # updated to support more feeds.
 
-field_map = dict(
+_field_map = dict(
     title=(['title'], u''),
     link=(['link'], u''),
     description=(["description", ('content', 'value'), "summary"], u''), #TODO the correct path is content[0].value doesn't fit my nice scheme
@@ -58,16 +58,16 @@ field_map = dict(
     content=(None, None))
 
 
-def get_nested(nested_dict, path):
+def _get_nested(nested_dict, path):
     if isinstance(path, str):
         path = (path, )
     return reduce(lambda x, y: x.get(y, {}), path, nested_dict)
 
 
-def map_entry_structure(fmap, entry):
+def _map_entry_structure(fmap, entry):
     return {
         arg: unicode(
-            reduce(lambda x, y: x or get_nested(entry, y) or default, paths,
+            reduce(lambda x, y: x or _get_nested(entry, y) or default, paths,
                    u'') or '')
         for arg, (paths, default) in fmap.iteritems() if paths is not None
     }

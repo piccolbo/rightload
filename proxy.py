@@ -37,7 +37,7 @@ def proxy(url):
                         parsed_feed
                     )  #if it's bozo copy fails and copy is not cached, so we skip
                     # deepcopy needed to avoid side effects on cache
-                response = (process(parsed_feed), 200, {})
+                response = (_process(parsed_feed), 200, {})
         if parsed_feed.has_key('headers'):  #some header rinsing
             for k, v in parsed_feed.headers.iteritems():
                 # TODO: seems to work with all the hop by hop  headers unset or to default values, need to look into this
@@ -51,6 +51,6 @@ def proxy(url):
         return ("POST not allowed for feeds", 405, {})
 
 
-def process(parsed_feed):
+def _process(parsed_feed):
     score = score_feed(parsed_feed) if (len(parsed_feed.entries) > 0) else []
     return feed2XML(embedUI(parsed_feed, score))

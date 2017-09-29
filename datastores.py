@@ -3,7 +3,7 @@ from os.path import basename
 import shove
 
 
-def get_shove_db(path):
+def _get_shove_db(path):
     attr_name = '_' + basename(path)
     db = getattr(g, attr_name, None)
     if db is None:
@@ -13,7 +13,8 @@ def get_shove_db(path):
 
 
 def training_db():
-    return get_shove_db('training.sqlite')
+    return _get_shove_db('training.sqlite')
+
 
 def model_db():
-    return get_shove_db('model.sqlite')
+    return _get_shove_db('model.sqlite')
