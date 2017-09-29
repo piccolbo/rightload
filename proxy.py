@@ -27,9 +27,9 @@ def proxy(url):
             modified = request.headers.get('IF_MODIFIED_SINCE')
             if False:
                 pass
-            # if (etag and etag == parsed_feed.get('etag')) or (
-            #         modified and modified == parsed_feed.get('modified')):
-            #     response = ("", 304, {})
+            if (etag and etag == parsed_feed.get('etag')) or (
+                    modified and modified == parsed_feed.get('modified')):
+                response = ("", 304, {})
             else:
                 if not parsed_feed['bozo']:
                     parsed_feed = copy.deepcopy(
