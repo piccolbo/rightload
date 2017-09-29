@@ -54,12 +54,12 @@ def score_feed(parsed_feed):
 
 
 def store_feedback(url, feedback, explicit):
-    #can only override explicit with explicit
-    if not explicit and training_db().get(url) is not None and \
-        training_db()[url].explicit:
-        return
-    training_db()[url] = Feedback(feedback=feedback, explicit=explicit)
-    training_db().sync()
+    # explicit overwrites anything
+    # implicit overwrites implicit
+    current_value = training_db().get(url)
+    if (current_value is None) or (not current_value.explicit) or explicit:
+        training_db()[url] = Feedback(feedback=feedback, explicit=explicit)
+        training_db().sync()
 
 
 def _url2vec_or_None(url):
