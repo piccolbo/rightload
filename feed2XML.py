@@ -1,5 +1,5 @@
 from datetime import datetime
-import feedgenerator
+from feedgenerator import Rss201rev2Feed, Atom1Feed
 from functools import reduce  # forward compatibility for Python 3
 import operator
 import re
@@ -11,9 +11,9 @@ def feed2XML(parsed_feed):
 
     def feedFactory(version):
         if version.upper().find('RSS') != -1:
-            return feedgenerator.Rss201rev2Feed
+            return Rss201rev2Feed
         else:
-            return feedgenerator.Atom1Feed
+            return Atom1Feed
 
     pf = parsed_feed.feed
     pf['title'] = pf.get('title', u'')
