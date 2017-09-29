@@ -27,6 +27,8 @@ def _scrape(url=None, html=None):
 
 
 _memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
+
+
 @_memory.cache(ignore=["entry"])
 def url2html(url, entry=None):
     try:
