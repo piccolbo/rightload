@@ -9,7 +9,6 @@ import torch
 from traceback import print_exc
 from warnings import warn
 
-memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit = 10**8)
 sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
 
 #alternate infersent load method based on https://stackoverflow.com/questions/42703500/best-way-to-save-a-trained-model-in-pytorch as chdir doesn't work in flask
@@ -30,6 +29,7 @@ _infersent.load_state_dict(
 _infersent.set_glove_path('InferSent/dataset/GloVe/glove.840B.300d.txt')
 _infersent.build_vocab_k_words(K=1)
 
+_memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10**9)
 
 
 @_memory.cache(ignore=["entry"])
