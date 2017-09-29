@@ -12,6 +12,10 @@ def _get_shove_db(path):
     return db
 
 
+def feed_db():
+    return _get_shove_db('feed.sqlite')
+
+
 def training_db():
     return _get_shove_db('training.sqlite')
 
