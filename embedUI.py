@@ -20,10 +20,6 @@ def _is_long(text):
     return len(text) > 1000
 
 
-# def sigmoid(x):
-#     return 1 / (1 + math.exp(-x))
-
-
 def _p(style, text):
     return '<p style="{style}">{text}</p>'.format(style=style, text=text)
 
@@ -87,13 +83,6 @@ def embedUI(parsed_feed, score):
         _embedUI_entry(e, s) for e, s in zip(parsed_feed.entries, score)
     ]
     return parsed_feed
-
-
-def ch_int(score, decreasing=False):
-    n = 128 + 64 + int(score * 64)
-    if decreasing:
-        n = 255 - n
-    return hex(n)[2:]
 
 
 _colors = list(Color(rgb=(1, 1, 1)).range_to(Color(rgb=(1, 0, 1)), 256))
