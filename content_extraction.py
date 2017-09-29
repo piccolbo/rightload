@@ -33,10 +33,10 @@ _memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
 def url2html(url, entry=None):
     try:
         html = _scrape(url=url).getHTML()
-        assert(html)
     except:
-        html = '<h1>{title}</h1>\n'.format(title=entry.title) + entry_content(entry)
-        assert(html)
+        html = '<h1>{title}</h1>\n'.format(
+            title=entry.title) + _get_entry_content(entry)
+    assert (html)
     return html
 
 
