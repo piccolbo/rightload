@@ -1,7 +1,8 @@
 #ingredients:   tinydb joblib.Memory
 from flask import Flask, jsonify
-import ml
-import proxy as xy
+from ml import store_feedback
+from ml import learn
+from proxy import proxy
 from werkzeug.contrib.profiler import ProfilerMiddleware
 import sys
 import trace
