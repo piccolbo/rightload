@@ -4,7 +4,6 @@ import numpy as np
 import requests
 
 
-memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**8)
 
 
 def entry_content(entry):
@@ -24,6 +23,7 @@ def _scrape(url=None, html=None):
             html=requests.get(url).content)
 
 
+_memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
 @_memory.cache(ignore=["entry"])
 def url2html(url, entry=None):
     try:
