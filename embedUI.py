@@ -4,10 +4,7 @@ from debug import spy
 from feature_extraction import text2sentences
 from flask import request
 from fuzzywuzzy import fuzz
-import math
-import nltk
 import re
-import requests
 from traceback import format_exc
 
 
