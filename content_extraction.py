@@ -56,9 +56,9 @@ def url2text(url, entry=None):
     return text
 
 
-def entry2text(entry):
-    return url2text(entry.link, entry)
+# def entry2text(entry):
+#     return url2text(entry.link, entry)
+#
 
-
-def entry2html(entry):
-    return url2html(entry.link, entry)
+# def entry2html(entry):
+#     return url2html(entry.link, entry)
