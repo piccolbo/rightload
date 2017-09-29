@@ -1,5 +1,6 @@
 import copy
 from embedUI import embedUI
+from datastores import feed_db
 from feed2XML import feed2XML
 import feedcache
 from flask import request, Response, redirect
@@ -7,12 +8,10 @@ from ml import score_feed
 import shove
 from werkzeug.http import is_hop_by_hop_header
 
-fc = feedcache.Cache(shove.Shove("simple://"))  #default timetolive = 300
-
 
 def proxy(url):
     if request.method == 'GET':
-        parsed_feed = fc.fetch(
+        parsed_feed = feedcache.Cache(feed_db()).fetch(
             '?'.join(filter(None, [url, request.query_string])),
             force_update=False
         )  #defaults: force_update = False, offline = False
