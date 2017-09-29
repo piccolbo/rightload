@@ -4,11 +4,14 @@ import numpy as np
 import requests
 
 
+def _get_entry_content(entry):
+    contents = [
+        entry.get("description", ""),
+        entry.get("content", [{}])[0].get("value", ""),
+        entry.get("summary", "")
+    ]
+    return contents[np.argmax(map(len, contents))]
 
-
-def entry_content(entry):
-    contents = [entry.description, entry.content[0].value,  entry.summary]
-    return contents[np.argmin(map(len, contents))]
 
 class FailedExtraction(Exception):
     pass
