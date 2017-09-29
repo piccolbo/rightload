@@ -45,7 +45,9 @@ def feed2XML(parsed_feed):
 _field_map = dict(
     title=(['title'], u''),
     link=(['link'], u''),
-    description=(["description", ('content', 'value'), "summary"], u''), #TODO the correct path is content[0].value doesn't fit my nice scheme
+    description=(
+        ["description", ('content', 'value'), "summary"], u''
+    ),  #TODO the correct path is content[0].value doesn't fit my nice scheme
     author_email=([('author_detail', 'email')], None),
     author_name=(['author', ('author_detail', 'name')], None),
     author_link=([('author_link', 'href')], None),
