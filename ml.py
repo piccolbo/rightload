@@ -73,7 +73,7 @@ def learn():
     Xy = [(X, [int(feedback)] * X.shape[0])
           for X, feedback in [(_url2vec_or_None(url), feedback)
                               for url, (feedback,
-                                        _) in training_db().iteritems()]
+                                        _) in list(training_db().iteritems())]
           if X is not None]
     X = np.concatenate([X_ for X_, _ in Xy], axis=0)
     y = np.concatenate([y_ for _, y_ in Xy], axis=0)
