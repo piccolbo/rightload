@@ -32,5 +32,7 @@ def _feedback(feedback, url):
 def _learn():
     learn()
     return ("Done", 204, {})
+
+
 if __name__ == 'main':
     app.run()
