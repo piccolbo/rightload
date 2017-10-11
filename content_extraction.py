@@ -68,11 +68,3 @@ def url2text(url, entry=None):
         log.error("Could not extract any text for {url}".format(url=url))
         raise FailedExtraction
     return text
-
-
-# def entry2text(entry):
-#     return url2text(entry.link, entry)
-#
-
-# def entry2html(entry):
-#     return url2html(entry.link, entry)
