@@ -22,10 +22,17 @@ class FailedExtraction(Exception):
 # http://tomazkovacic.com/blog/2011/06/09/evaluating-text-extraction-algorithms/
 def _scrape(url=None, html=None):
     assert (url != html)
-    return Extractor(
-        extractor='DefaultExtractor',
-        html=html) if html is not None else _scrape(
-            html=requests.get(url).content)
+    if html is not None:
+        try:
+            return Extractor(extractor='DefaultExtractor', html=html)
+        except Exception as e:
+            log.warn("can't extract {html}".format(html=html))
+    else:
+        try:
+            return Extractor(extractor='DefaultExtractor', url=url)
+        except Exception as e:
+            log.warn("Can't extract {url} with boilerpipe".format(url=url))
+            return _scrape(html=requests.get(url).content)
 
 
 _memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
