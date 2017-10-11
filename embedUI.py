@@ -12,8 +12,8 @@ from traceback import format_exc
 
 
 def _feedbackurl(link, well_spent):
-    return ("http://" + request.host + "/feedback/" +
-            ("l" if well_spent else "d") + "/" + link)
+    return (u"http://" + request.host + u"/feedback/" +
+            (u"l" if well_spent else u"d") + u"/" + link)
 
 
 def _is_long(text):
@@ -21,21 +21,22 @@ def _is_long(text):
 
 
 def _p(style, text):
-    return '<p style="{style}">{text}</p>'.format(style=style, text=text)
+    return u'<p style="{style}">{text}</p>'.format(style=style, text=text)
 
 
 def _a(href, target, text):
-    return '<a href="{href}" target="{target}">{text}</a>'.format(
+    return u'<a href="{href}" target="{target}">{text}</a>'.format(
         href=href, target=target, text=text)
 
 
 def _font(color, text):
-    return '<font color="{color}">{text}</font>'.format(color=color, text=text)
+    return u'<font color="{color}">{text}</font>'.format(
+        color=color, text=text)
 
 
 def _span(text, color):
-    style1 = '"border-bottom: 3px solid {color}"'
-    style2 = '"text-decoration: underline; text-decoration-color: {color}"'
+    style1 = u'"border-bottom: 3px solid {color}"'
+    style2 = u'"text-decoration: underline; text-decoration-color: {color}"'
     style = style1.format(color=color)
     return u'<span style={style}>{text}</span>'.format(text=text, style=style)
 
@@ -43,10 +44,10 @@ def _span(text, color):
 def _feedback_link(is_good, entry_link):
     return _a(
         href=_feedbackurl(link=entry_link, well_spent=is_good),
-        target="_top",
+        target=u"_top",
         text=_font(
-            color="green" if is_good else "red",
-            text="Time Well Spent" if is_good else "Time Wasted"))
+            color=u"green" if is_good else u"red",
+            text=u"Time Well Spent" if is_good else u"Time Wasted"))
 
 
 def _conditional_bar(mean_score, entry_link):
@@ -61,7 +62,7 @@ def _conditional_bar(mean_score, entry_link):
 
 def _add_bar(text, mean_score, entry_link):
     bar = _conditional_bar(mean_score, entry_link)
-    return bar + text + (bar if _is_long(text) else '')
+    return bar + text + (bar if _is_long(text) else u'')
 
 
 def _embedUI_entry(entry, score):
