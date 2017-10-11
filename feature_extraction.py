@@ -34,16 +34,16 @@ _memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10**9)
 
 
 @_memory.cache(ignore=["entry"])
-def url2vec(url, entry=None):
-    return _text2vec(url2text(url, entry))
+def url2mat(url, entry=None):
+    return _text2mat(url2text(url, entry))
 
 
 def text2sentences(text):
     return _sent_detector.tokenize(text.strip())
 
 
-def _text2vec(text, max_sentences=100):
     sentences = text2sentences(text)[:max_sentences]  #limit to cap latency
+def _text2mat(text):
     _infersent.update_vocab(sentences, tokenize=True)
     if sentences:
         return _infersent.encode(sentences, tokenize=True)
