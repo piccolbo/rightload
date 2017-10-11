@@ -49,10 +49,12 @@ def _feedback_link(is_good, entry_link):
 
 def _conditional_bar(mean_score, entry_link):
     return _p(
-        style="BACKGROUND-COLOR: #DBDBDB",
-        text=(_feedback_link(True, entry_link) if mean_score <= 0.5 else '') + \
-            (" or " if mean_score == 0.5 else "") + \
-            (_feedback_link(False, entry_link) if mean_score >= 0.5 else ''))
+        style=u"BACKGROUND-COLOR: #DBDBDB",
+        text=(_feedback_link(True, entry_link) if mean_score <= 0.5 else u'')
+        + (u" or " if mean_score == 0.5 else u"")
+        + (_feedback_link(False, entry_link) if mean_score >= 0.5 else u''))
+
+
 
 
 def _add_bar(text, mean_score, entry_link):
@@ -96,7 +98,7 @@ def _highlight_text(text, score):
         sentences = text2sentences(text)
         return "".join(
             [_highlight_sentence(x, s) for x, s in zip(sentences, score)])
-    except:
+    except Exception:
         log.error(format_exc())
         return text
 

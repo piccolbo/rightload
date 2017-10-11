@@ -23,10 +23,10 @@ def feed2XML(parsed_feed):
         **dict(zip(map(str, pf.keys()), pf.values())))
     for e in parsed_feed.entries:
         add_args = _map_entry_structure(_field_map, e)
-        if e.has_key('published_parsed'):
+        if 'published_parsed' in e:
             add_args['pubdate'] = datetime.fromtimestamp(
                 mktime(e['published_parsed']))
-        if e.has_key('updated_parsed'):
+        if 'updated_parsed' in e:
             add_args['updateddate'] = datetime.fromtimestamp(
                 mktime(e['updated_parsed']))
         feed.add_item(**add_args)
@@ -47,7 +47,7 @@ _field_map = dict(
     link=(['link'], u''),
     description=(
         ["description", ('content', 'value'), "summary"], u''
-    ),  #TODO the correct path is content[0].value doesn't fit my nice scheme
+    ),  # TODO: the correct path is content[0].value doesn't fit my nice scheme
     author_email=([('author_detail', 'email')], None),
     author_name=(['author', ('author_detail', 'name')], None),
     author_link=([('author_link', 'href')], None),

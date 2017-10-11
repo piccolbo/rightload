@@ -1,4 +1,4 @@
-#ingredients:   tinydb joblib.Memory
+# ingredients:   tinydb joblib.Memory
 from flask import Flask, jsonify
 from ml import store_feedback
 from ml import learn

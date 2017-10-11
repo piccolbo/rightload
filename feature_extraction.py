@@ -9,7 +9,9 @@ import torch
 
 _sent_detector = nltk_load('tokenizers/punkt/english.pickle')
 
-#alternate infersent load method based on https://stackoverflow.com/questions/42703500/best-way-to-save-a-trained-model-in-pytorch as chdir doesn't work in flask
+# alternate infersent load method based on
+# https://stackoverflow.com/questions/42703500/best-way-to-save-a-trained-model-in-pytorch
+# as chdir doesn't work in flask
 _config = dict(
     bsize=64,
     word_emb_dim=300,
@@ -23,7 +25,8 @@ _infersent.load_state_dict(
     torch.load(
         'InferSent/encoder/infersent.allnli.state.pickle',
         map_location=lambda storage, loc: storage))
-#saved with torch.save(_infersent.state_dict(), "InferSent/encoder/infersent.allnli.state.pickle")
+# saved with torch.save(
+# _infersent.state_dict(), "InferSent/encoder/infersent.allnli.state.pickle")
 _infersent.set_glove_path('InferSent/dataset/GloVe/glove.840B.300d.txt')
 _infersent.build_vocab_k_words(K=1)
 

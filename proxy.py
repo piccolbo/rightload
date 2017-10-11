@@ -14,13 +14,13 @@ def proxy(url):
         parsed_feed = feedcache.Cache(feed_db()).fetch(
             '?'.join(filter(None, [url, request.query_string])),
             force_update=False
-        )  #defaults: force_update = False, offline = False
+        )  # defaults: force_update = False, offline = False
 
-        #return content
+        # return content
         status = parsed_feed.get('status', 404)
-        if status >= 400:  #deal with errors
+        if status >= 400:  # deal with errors
             response = ("External error", status, {})
-        elif status >= 300:  #deal with redirects
+        elif status >= 300:  # deal with redirects
             return redirect("/feed/{reurl}".format(reurl=parsed_feed.href))
         else:
             etag = request.headers.get('IF_NONE_MATCH')
@@ -34,12 +34,14 @@ def proxy(url):
                 if not parsed_feed['bozo']:
                     parsed_feed = copy.deepcopy(
                         parsed_feed
-                    )  #if it's bozo copy fails and copy is not cached, so we skip
+                    )  # if it's bozo copy fails and copy is not cached,
+                    # so we skip
                     # deepcopy needed to avoid side effects on cache
                 response = (_process(parsed_feed), 200, {})
-        if parsed_feed.has_key('headers'):  #some header rinsing
+        if 'headers' in parsed_feed:  # some header rinsing
             for k, v in parsed_feed.headers.iteritems():
-                # TODO: seems to work with all the hop by hop  headers unset or to default values, need to look into this
+                # TODO: seems to work with all the hop by hop  headers unset
+                # or to default values, need to look into this
                 if not is_hop_by_hop_header(
                         k
                 ) and k != 'content-length' and k != 'content-encoding':

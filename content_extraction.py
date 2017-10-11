@@ -18,7 +18,8 @@ class FailedExtraction(Exception):
     pass
 
 
-# see http://tomazkovacic.com/blog/2011/06/09/evaluating-text-extraction-algorithms/
+# see
+# http://tomazkovacic.com/blog/2011/06/09/evaluating-text-extraction-algorithms/
 def _scrape(url=None, html=None):
     assert (url != html)
     return Extractor(
@@ -43,14 +44,14 @@ def url2html(url, entry=None):
 
 @_memory.cache(ignore=["entry"])
 def url2text(url, entry=None):
-    try:  #scrape url
+    try:  # scrape url
         text = _scrape(url=url).getText()
         if len(text) < 40:
             raise FailedExtraction
-    except:  # scrape entry
+    except Exception:  # scrape entry
         try:  # scrape entry content
             entry_content = _scrape(html=_get_entry_content(entry)).getText()
-        except:
+        except Exception:
             entry_content = ''
         text = (entry.title or '') + "." + (entry_content or '')
     assert (text)
