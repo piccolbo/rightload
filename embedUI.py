@@ -120,7 +120,8 @@ def _highlight_sentence(sentence, score):
 
 
 def _best_match_score(x, sentences, score):
-    return score[np.array([fuzz.ratio(x, s) for x in sentences]).argmax()]
+    assert len(sentences) == len(score), (len(sentences), len(score))
+    return score[np.array([fuzz.ratio(x, s) for s in sentences]).argmax()]
 
 
 def _highlight_html(html, text, score):
@@ -131,12 +132,4 @@ def _highlight_html(html, text, score):
             bs.BeautifulSoup(
                 _highlight_sentence(x, _best_match_score(x, sentences,
                                                          score))))
-
-
-def _escape(s):
-    return re.sub(r"[(){}\[\].*?|^$\\+-]", r"\\\g<0>", s)
-
-
-def _patternize(sentence):
-    return re.sub('(\s)+', '.*', _escape(sentence))
     return unicode(soup)
