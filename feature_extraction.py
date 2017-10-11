@@ -6,8 +6,6 @@ from numpy import resize
 import os
 import re
 import torch
-from traceback import print_exc
-from warnings import warn
 
 _sent_detector = nltk_load('tokenizers/punkt/english.pickle')
 

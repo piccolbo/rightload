@@ -6,6 +6,10 @@ from proxy import proxy
 from werkzeug.contrib.profiler import ProfilerMiddleware
 import sys
 import trace
+import logging as log
+
+# should be set at the project level
+log.basicConfig(filename="./log", level=log.INFO)
 
 # create a Trace object, telling it what to ignore, and whether to
 # do tracing or line-counting or both.
@@ -26,6 +30,8 @@ def _feed(url):
 def _feedback(feedback, url):
     store_feedback(url=url, feedback=feedback == 'l', explicit=True)
     return ("Thank you", 204, {})
+    log.info("storing feedback {feedback} for {url}".format(
+        feedback=feedback, url=url))
 
 
 @app.route('/learn')

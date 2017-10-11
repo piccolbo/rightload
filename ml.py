@@ -4,13 +4,13 @@ from content_extraction import FailedExtraction
 from datastores import training_db, model_db
 from debug import spy
 from flask import g
+import logging as log
 import numpy as np
 import os
 import sklearn.linear_model as lm
 import sklearn as sk
 from time import sleep
 import traceback
-from warnings import warn
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
@@ -46,9 +46,7 @@ def _score_entry(entry):
             url=entry.link, feedback=probs.mean() > 0.5, explicit=False)
         return probs
     except Exception, e:
-        warn("Failed Scoring")
-        warn(entry.link)
-        warn(traceback.format_exc())
+        log.error("Failed Scoring for {link}".format(entry.link))
         raise
 
 
@@ -86,5 +84,5 @@ def learn():
     _set_model(model)
 
     msg = "Classifier Score: {score}".format(score=model.score(X=X, y=y))
-    print msg
+    log.info(msg)
     return msg

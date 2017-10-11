@@ -1,5 +1,6 @@
 from boilerpipe.extract import Extractor
 from joblib import Memory
+import logging as log
 import numpy as np
 import requests
 

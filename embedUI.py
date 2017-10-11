@@ -4,6 +4,7 @@ from debug import spy
 from feature_extraction import text2sentences
 from flask import request
 from fuzzywuzzy import fuzz
+import logging as log
 import re
 from traceback import format_exc
 
@@ -96,7 +97,7 @@ def _highlight_text(text, score):
         return "".join(
             [_highlight_sentence(x, s) for x, s in zip(sentences, score)])
     except:
-        print(format_exc())
+        log.error(format_exc())
         return text
 
 
