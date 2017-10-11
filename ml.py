@@ -19,6 +19,7 @@ _memory = Memory(cachedir="score-cache", verbose=1, bytes_limit=10**9)
 
 _model_attr_name = "_model"
 
+
 def _set_model(model):
     setattr(g, _model_attr_name, model)
     model_db()["user"] = model
@@ -44,7 +45,7 @@ def _score_entry(entry):
     try:
         X = url2mat(entry.link, entry)
         probs = _get_model().predict_proba(X=X)[:, 1]
-        #implicit feedback: if not overridden we assume prediction correct
+        # implicit feedback: if not overridden we assume prediction correct
         store_feedback(
             url=entry.link, feedback=probs.mean() > 0.5, explicit=False)
         return probs
@@ -68,8 +69,8 @@ def store_feedback(url, feedback, explicit):
 
 def _url2mat_or_None(url):
     try:
-    except:
         return url2mat(url)
+    except Exception:
         return None
 
 
