@@ -73,16 +73,19 @@ def _add_bar(text, mean_score, entry_link):
 def _embedUI_entry(entry, score):
     mean_score = score.mean()
     text = url2text(entry.link, entry)
-    htext = _highlight_text(text, score)
-    #html = url2html(entry.link)
-    #hhtml = highlight_html(html, text, score)
-    if entry.has_key('description'):
-        entry['description'] = _add_bar(htext, mean_score, entry.link)
-    if entry.has_key('content'):
-        entry['content'][0].value = _add_bar(htext, mean_score, entry.link)
-    if entry.has_key('title'):
-        entry['title'] = u"{mean_score:} | {title}".format(
-            mean_score=int(mean_score * 100), title=entry['title'])
+    high_text = _highlight_text(text, score)
+    # html = url2html(entry.link, entry)
+    # high_html = _highlight_html(html, text, score)
+    if u'description' in entry:
+        entry[u'description'] = _add_bar(high_text, mean_score, entry.link)
+    if u'content' in entry:
+        entry[u'content'][0].value = _add_bar(high_text, mean_score,
+                                              entry.link)
+        entry[u'content'][0].value = _add_bar(high_text, mean_score,
+                                              entry.link)
+    if u'title' in entry:
+        entry[u'title'] = u"{mean_score:} | {title}".format(
+            mean_score=int(mean_score * 100), title=entry[u'title'])
     return entry
 
 
