@@ -6,3 +6,5 @@ content-cache
 feature-cache
 
 python-boilerpipe/
+
+score-cache/*
