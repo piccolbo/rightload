@@ -107,7 +107,7 @@ def _score2color(score):
 def _highlight_text(text, score):
     try:
         sentences = text2sentences(text)
-        return "".join(
+        return u"".join(
             [_highlight_sentence(x, s) for x, s in zip(sentences, score)])
     except Exception:
         log.error(format_exc())
