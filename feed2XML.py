@@ -70,6 +70,6 @@ def _map_entry_structure(fmap, entry):
     return {
         arg: unicode(
             reduce(lambda x, y: x or _get_nested(entry, y) or default, paths,
-                   u'') or '')
+                   u'') or u'')
         for arg, (paths, default) in fmap.iteritems() if paths is not None
     }
