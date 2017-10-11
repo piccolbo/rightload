@@ -60,9 +60,7 @@ def score_feed(parsed_feed):
 
 def store_feedback(url, feedback, explicit):
     # explicit overwrites anything
-    # implicit overwrites implicit
-    current_value = training_db().get(url)
-    if (current_value is None) or (not current_value.explicit) or explicit:
+    if (training_db().get(url) is None) or explicit:
         training_db()[url] = Feedback(feedback=feedback, explicit=explicit)
         training_db().sync()
 
