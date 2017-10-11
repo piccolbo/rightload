@@ -43,9 +43,12 @@ def url2html(url, entry=None):
     try:
         html = _scrape(url=url).getHTML()
     except Exception as e:
+        log.warn("{url} can't be scraped\n".format(url=url))
         html = '<h1>{title}</h1>\n'.format(
             title=entry.title) + _get_entry_content(entry)
-    assert (html)
+    if not html:
+        log.error("Could not extract any html for for {url}".format(url=url))
+        raise FailedExtraction
     return html
 
 
@@ -61,7 +64,9 @@ def url2text(url, entry=None):
         except Exception:
             entry_content = ''
         text = (entry.title or '') + "." + (entry_content or '')
-    assert (text)
+    if not text:
+        log.error("Could not extract any text for {url}".format(url=url))
+        raise FailedExtraction
     return text
 
 
