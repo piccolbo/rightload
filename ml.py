@@ -37,7 +37,7 @@ def _get_model():
 
 
 def _new_model():
-    return lm.LogisticRegression(class_weight='balanced', solver = "saga")
+    return lm.LogisticRegression(class_weight='balanced', solver="lbfgs")
 
 
 @_memory.cache
