@@ -4,6 +4,7 @@ from content_extraction import FailedExtraction
 from datastores import training_db, model_db
 from debug import spy
 from flask import g
+from joblib import Memory
 import logging as log
 import numpy as np
 import os
@@ -14,6 +15,7 @@ import traceback
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
+_memory = Memory(cachedir="score-cache", verbose=1, bytes_limit=10**9)
 
 _model_attr_name = "_model"
 
@@ -37,6 +39,7 @@ def _new_model():
     return lm.LogisticRegression(class_weight='balanced', solver = "saga")
 
 
+@_memory.cache
 def _score_entry(entry):
     try:
         X = url2mat(entry.link, entry)
