@@ -131,7 +131,6 @@ def _highlight_html(html, text, score):
             bs.BeautifulSoup(
                 _highlight_sentence(x, _best_match_score(x, sentences,
                                                          score))))
-    return str(soup)
 
 
 def _escape(s):
@@ -140,3 +139,4 @@ def _escape(s):
 
 def _patternize(sentence):
     return re.sub('(\s)+', '.*', _escape(sentence))
+    return unicode(soup)
