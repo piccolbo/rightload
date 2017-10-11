@@ -38,12 +38,12 @@ def url2mat(url, entry=None):
     return _text2mat(url2text(url, entry))
 
 
-def text2sentences(text):
-    return _sent_detector.tokenize(text.strip())
+def text2sentences(text, max_sentences=100):
+    return _sent_detector.tokenize(text.strip())[:max_sentences]
 
 
-    sentences = text2sentences(text)[:max_sentences]  #limit to cap latency
 def _text2mat(text):
+    sentences = text2sentences(text)  # limit to cap latency
     _infersent.update_vocab(sentences, tokenize=True)
     if sentences:
         return _infersent.encode(sentences, tokenize=True)
