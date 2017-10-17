@@ -73,19 +73,19 @@ def _url2mat_or_None(url):
 
 
 def learn():
-    Xyw = [
+    Xy = [
         dict(X=X, y=[int(feedback)] * X.shape[0])
         for X, feedback in [(_url2mat_or_None(url), feedback)
                             for url, (feedback,
                                       _) in list(training_db().iteritems())]
         if X is not None
     ]
-    X = np.concatenate([z['X'] for z in Xyw], axis=0)
-    y = np.concatenate([z['y'] for z in Xyw], axis=0)
-    w = np.concatenate(
-        [[1.0 / z['X'].shape[0]] * z['X'].shape[0] for z in Xyw], axis=0)
+    X = np.concatenate([z['X'] for z in Xy], axis=0)
+    y = np.concatenate([z['y'] for z in Xy], axis=0)
+    # w = np.concatenate(
+    #     [[1.0 / z['X'].shape[0]] * z['X'].shape[0] for z in Xyw], axis=0)
     model = _new_model()
-    model.fit(X=X, y=y, sample_weight=w)
+    model.fit(X=X, y=y)  # , sample_weight=w)
 
     _set_model(model)
 
