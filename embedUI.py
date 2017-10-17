@@ -54,9 +54,10 @@ def _feedback_link(is_good, entry_link):
 def _conditional_bar(mean_score, entry_link):
     return _p(
         style=u"BACKGROUND-COLOR: #DBDBDB",
-        text=(_feedback_link(True, entry_link) if mean_score <= 0.5 else u'')
-        + (u" or " if mean_score == 0.5 else u"")
-        + (_feedback_link(False, entry_link) if mean_score >= 0.5 else u''))
+        text=(_feedback_link(True, entry_link) if mean_score <= 0.5 else u'') +
+        (u" or "
+         if mean_score == 0.5 else u"") + (_feedback_link(False, entry_link)
+                                           if mean_score >= 0.5 else u''))
 
 
 # def _bar(entry_link):
