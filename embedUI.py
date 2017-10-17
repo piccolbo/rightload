@@ -99,7 +99,7 @@ def embedUI(parsed_feed, score):
 
 
 _colors = list(
-    Color(hsl=(0.16, 1, 1)).range_to(Color(hsl=(0.16, 1, 0.5)), 256))
+    Color(hsl=(0.9, 1, 1)).range_to(Color(hsl=(0.9, 1, 0.7)), 256))
 
 
 def _score2color(score):
