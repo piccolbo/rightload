@@ -117,7 +117,7 @@ def _highlight_text(text, score):
 
 
 def _highlight_sentence(sentence, score):
-    return _span(u"<sup>{s:.2f}</sup>{x}".format(x=sentence, s=score),
+    return _span(u"<sup>{s:.2f}</sup> {x}".format(x=sentence, s=score),
                  _score2color(score))
 
 
