@@ -127,6 +127,7 @@ def _best_match_score(x, sentences, score):
 
 
 def _highlight_html(html, text, score):
+    # this doesn't work yet for paragraphs of multiple sentences
     sentences = text2sentences(text)
     soup = bs.BeautifulSoup(html)
     for x in soup.findAll(text=True):
