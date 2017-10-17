@@ -26,12 +26,13 @@ def _scrape(url=None, html=None):
         try:
             return Extractor(extractor='DefaultExtractor', html=html)
         except Exception as e:
-            log.warn("can't extract {html}".format(html=html))
+            log.warn("Can't extract html from {html}".format(html=html))
     else:
         try:
             return Extractor(extractor='DefaultExtractor', url=url)
         except Exception as e:
-            log.warn("Can't extract {url} with boilerpipe".format(url=url))
+            log.warn(
+                "Can't extract from {url} with boilerpipe".format(url=url))
             return _scrape(html=requests.get(url).content)
 
 
