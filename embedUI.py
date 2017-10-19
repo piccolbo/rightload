@@ -1,5 +1,5 @@
 import BeautifulSoup as bs
-from content_extraction import url2text, url2html
+from content_extraction import entry2url, entry2html, entry2text
 from colour import Color
 from debug import spy
 from feature_extraction import text2sentences
@@ -42,49 +42,49 @@ def _span(text, color):
     return u'<span style={style}>{text}</span>'.format(text=text, style=style)
 
 
-def _feedback_link(is_good, entry_link):
+def _feedback_link(is_good, content_link):
     return _a(
-        href=_feedbackurl(link=entry_link, well_spent=is_good),
+        href=_feedbackurl(link=content_link, well_spent=is_good),
         target=u"_top",
         text=_font(
             color=u"green" if is_good else u"red",
             text=u"Time Well Spent" if is_good else u"Time Wasted"))
 
 
-def _conditional_bar(mean_score, entry_link):
+def _conditional_bar(mean_score, content_link):
     return _p(
         style=u"BACKGROUND-COLOR: #DBDBDB",
-        text=(_feedback_link(True, entry_link) if mean_score <= 0.5 else u'') +
+        text=(_feedback_link(True, content_link)
+              if mean_score <= 0.5 else u'') +
         (u" or "
-         if mean_score == 0.5 else u"") + (_feedback_link(False, entry_link)
+         if mean_score == 0.5 else u"") + (_feedback_link(False, content_link)
                                            if mean_score >= 0.5 else u''))
 
 
-# def _bar(entry_link):
+# def _bar(content_link):
 #     return _p(
 #         style=u"BACKGROUND-COLOR: #DBDBDB",
-#         text=_feedback_link(True, entry_link) + u" or " + _feedback_link(
-#             False, entry_link))
+#         text=_feedback_link(True, content_link) + u" or " + _feedback_link(
+#             False, content_link))
 
 
-def _add_bar(text, mean_score, entry_link):
-    bar = _conditional_bar(mean_score, entry_link)
+def _add_bar(text, mean_score, content_link):
+    bar = _conditional_bar(mean_score, content_link)
     return bar + text + (bar if _is_long(text) else u'')
 
 
 def _embedUI_entry(entry, score):
     mean_score = score.mean()
-    text = url2text(entry.link, entry)
+    text = entry2text(entry)
     high_text = _highlight_text(text, score)
-    # html = url2html(entry.link, entry)
+    # html = entry2html(entry)
     # high_html = _highlight_html(html, text, score)
+    url = entry2url(entry)
     if u'description' in entry:
-        entry[u'description'] = _add_bar(high_text, mean_score, entry.link)
+        entry[u'description'] = _add_bar(high_text, mean_score, url)
     if u'content' in entry:
-        entry[u'content'][0].value = _add_bar(high_text, mean_score,
-                                              entry.link)
-        entry[u'content'][0].value = _add_bar(high_text, mean_score,
-                                              entry.link)
+        entry[u'content'][0].value = _add_bar(high_text, mean_score, url)
+        entry[u'content'][0].value = _add_bar(high_text, mean_score, url)
     if u'title' in entry:
         entry[u'title'] = u"{mean_score:} | {title}".format(
             mean_score=int(mean_score * 100), title=entry[u'title'])
@@ -98,8 +98,7 @@ def embedUI(parsed_feed, score):
     return parsed_feed
 
 
-_colors = list(
-    Color(hsl=(0.9, 1, 1)).range_to(Color(hsl=(0.9, 1, 0.7)), 256))
+_colors = list(Color(hsl=(0.9, 1, 1)).range_to(Color(hsl=(0.9, 1, 0.7)), 256))
 
 
 def _score2color(score):

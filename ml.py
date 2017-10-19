@@ -1,6 +1,6 @@
-from feature_extraction import url2mat
+from feature_extraction import entry2mat
 from collections import namedtuple
-from content_extraction import FailedExtraction
+from content_extraction import FailedExtraction, entry2url
 from datastores import training_db, model_db
 from debug import spy
 from flask import g
@@ -42,15 +42,16 @@ def _new_model():
 
 @_memory.cache
 def _score_entry(entry):
+    url = entry2url(entry)
     try:
-        X = url2mat(entry.link, entry)
+        X = entry2mat(entry)
         probs = _get_model().predict_proba(X=X)[:, 1]
         # implicit feedback: if not overridden we assume prediction correct
         store_feedback(
-            url=entry.link, feedback=probs.mean() > 0.5, explicit=False)
+            url=url, feedback=probs.mean() > 0.5, explicit=False)
         return probs
     except Exception, e:
-        log.error("Failed Scoring for {link}".format(entry.link))
+        log.error("Failed Scoring for {url}".format(url=url))
         raise
 
 
