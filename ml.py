@@ -50,7 +50,7 @@ def _score_entry(entry):
             url=entry.link, feedback=probs.mean() > 0.5, explicit=False)
         return probs
     except Exception, e:
-        log.error("Failed Scoring for {link}".format(entry.link))
+        log.error("Failed Scoring for {link}".format(link=entry.link))
         raise
 
 
