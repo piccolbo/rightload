@@ -8,3 +8,4 @@ feature-cache
 python-boilerpipe/
 
 score-cache/*
+log
