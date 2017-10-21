@@ -74,7 +74,9 @@ def entry2url(entry):
 
 
 def entry2html(entry):
-    return _url2html(entry2url(entry), entry)
+    url = entry2url(entry)
+    return _url2html(None, entry) if _is_twitter(url) else _url2html(
+        url, entry)
 
 
 def entry2text(entry):
