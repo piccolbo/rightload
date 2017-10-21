@@ -15,7 +15,7 @@ import traceback
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
-_memory = Memory(cachedir="score-cache", verbose=1, bytes_limit=10**9)
+# _memory = Memory(cachedir="score-cache", verbose=1, bytes_limit=10**9)
 
 _model_attr_name = "_model"
 
@@ -40,7 +40,7 @@ def _new_model():
     return lm.LogisticRegression(class_weight='balanced', solver="lbfgs")
 
 
-@_memory.cache
+# @_memory.cache
 def _score_entry(entry):
     url = entry2url(entry)
     try:

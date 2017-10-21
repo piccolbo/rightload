@@ -59,7 +59,7 @@ def _scrape(url=None, html=None):
             return _scrape(html=requests.get(url).content)
 
 
-_memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
+# _memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
 
 
 def entry2url(entry):
@@ -83,7 +83,7 @@ def entry2text(entry):
         url, entry)
 
 
-@_memory.cache(ignore=["entry"])
+# @_memory.cache(ignore=["entry"])
 def _url2html(url, entry=None):
     try:
         html = _scrape(url=url).getHTML()
@@ -97,7 +97,7 @@ def _url2html(url, entry=None):
     return html
 
 
-@_memory.cache(ignore=["entry"])
+# @_memory.cache(ignore=["entry"])
 def _url2text(url, entry=None):
     try:  # scrape url
         text = _scrape(url=url).getText()

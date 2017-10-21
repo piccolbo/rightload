@@ -33,7 +33,7 @@ _infersent.build_vocab_k_words(K=1)
 _memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10**9)
 
 
-@_memory.cache(ignore=["entry"])
+# @_memory.cache(ignore=["entry"])
 def entry2mat(entry):
     return _text2mat(entry2text(entry))
 
@@ -42,6 +42,7 @@ def text2sentences(text, max_sentences=100):
     return _sent_detector.tokenize(text.strip())[:max_sentences]
 
 
+@_memory.cache
 def _text2mat(text):
     sentences = text2sentences(text)  # limit to cap latency
     _infersent.update_vocab(sentences, tokenize=True)
