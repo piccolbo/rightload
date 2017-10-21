@@ -38,13 +38,13 @@ def entry2mat(entry):
     return _text2mat(entry2text(entry))
 
 
-def text2sentences(text, max_sentences=100):
+def text2sentences(text, max_sentences=300):  # limit to cap latency
     return _sent_detector.tokenize(text.strip())[:max_sentences]
 
 
 @_memory.cache
 def _text2mat(text):
-    sentences = text2sentences(text)  # limit to cap latency
+    sentences = text2sentences(text)
     _infersent.update_vocab(sentences, tokenize=True)
     if sentences:
         return _infersent.encode(sentences, tokenize=True)
