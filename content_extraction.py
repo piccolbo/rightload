@@ -49,7 +49,7 @@ def _scrape(url=None, html=None):
         try:
             return Extractor(extractor='DefaultExtractor', html=html)
         except Exception as e:
-            log.warn("Can't extract html from {html}".format(html=html))
+            log.warn("Can't extract html from {html}".format(html=html[:800]))
     else:
         try:
             return Extractor(extractor='DefaultExtractor', url=url)
