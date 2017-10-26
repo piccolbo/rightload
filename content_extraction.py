@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from boilerpipe.extract import Extractor
-from joblib import Memory
 import logging as log
 import numpy as np
 import re
@@ -65,7 +64,6 @@ def entry2url(entry):
     url = entry.link
     if _is_twitter(url):
         try:
-            content = _get_entry_content(entry)
             url = _get_first_url(content)
         except Exception:
             pass
