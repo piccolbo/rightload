@@ -33,10 +33,10 @@ def _font(color, text):
 
 
 def _span(text, color):
-    style1 = u'"border-bottom: 3px solid {color}"'
-    style2 = u'"text-decoration: underline; text-decoration-color: {color}"'
-    style3 = u'"background-color: {color};  line-height: auto"'
-    style = style3.format(color=color)
+    # style = u'"border-bottom: 3px solid {color}"'
+    # style = u'"text-decoration: underline; text-decoration-color: {color}"'
+    style = u'"background-color: {color};  line-height: auto"'
+    style = style.format(color=color)
     return u'<span style={style}>{text}</span>'.format(text=text, style=style)
 
 
