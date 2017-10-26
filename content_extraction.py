@@ -64,7 +64,8 @@ def entry2url(entry):
     url = entry.link
     if _is_twitter(url):
         try:
-            url = _get_first_url(content)
+            ex_url = _get_first_url(_get_entry_content(entry))
+            url = ex_url or url
         except Exception:
             pass
     return url
