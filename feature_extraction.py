@@ -30,9 +30,14 @@ _infersent.build_vocab_k_words(K=1)
 _memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10**9)
 
 
-# @_memory.cache(ignore=["entry"])
-def entry2mat(entry):
+@_memory.cache(ignore=["entry"])
+def entry2mat(entry, url):
+    assert entry is not None
     return _text2mat(entry2text(entry))
+
+
+def url2mat(url):
+    return entry2mat(None, url)
 
 
 def text2sentences(text, max_sentences=300):  # limit to cap latency
