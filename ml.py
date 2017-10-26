@@ -1,17 +1,11 @@
-from feature_extraction import entry2mat
+from feature_extraction import entry2mat, url2mat
 from collections import namedtuple
-from content_extraction import FailedExtraction, entry2url
+from content_extraction import entry2url
 from datastores import training_db, model_db
-from debug import spy
 from flask import g
-from joblib import Memory
 import logging as log
 import numpy as np
-import os
 import sklearn.linear_model as lm
-import sklearn as sk
-from time import sleep
-import traceback
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
