@@ -38,7 +38,7 @@ def _new_model():
 def _score_entry(entry):
     url = entry2url(entry)
     try:
-        X = entry2mat(entry)
+        X = entry2mat(entry, url)
         probs = _get_model().predict_proba(X=X)[:, 1]
         # implicit feedback: if not overridden we assume prediction correct
         store_feedback(
