@@ -2,9 +2,6 @@ from content_extraction import entry2text
 from InferSent.encoder import models as im
 from joblib import Memory
 from nltk.data import load as nltk_load
-from numpy import resize
-import os
-import re
 import torch
 
 _sent_detector = nltk_load('tokenizers/punkt/english.pickle')
