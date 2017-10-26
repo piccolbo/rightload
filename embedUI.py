@@ -1,13 +1,11 @@
 import BeautifulSoup as bs
-from content_extraction import entry2url, entry2html, entry2text
+from content_extraction import entry2url, entry2text
 from colour import Color
-from debug import spy
 from feature_extraction import text2sentences
 from flask import request
 from fuzzywuzzy import fuzz
 import logging as log
 import numpy as np
-import re
 from traceback import format_exc
 
 
