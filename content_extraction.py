@@ -88,7 +88,8 @@ def _url2html(url, entry=None):
     try:
         html = _scrape(url=url).getHTML()
     except Exception as e:
-        log.warn("{url} can't be scraped\n".format(url=url))
+        log.warn("{url} can't be scraped because of exception {e}".format(
+            url=url, e=e))
         html = '<h1>{title}</h1>\n'.format(
             title=entry.title) + _get_entry_content(entry)
     if not html:
