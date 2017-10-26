@@ -9,3 +9,4 @@ python-boilerpipe/
 
 score-cache/*
 log
+*.log
