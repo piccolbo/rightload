@@ -1,8 +1,6 @@
 from datetime import datetime
 from feedgenerator import Rss201rev2Feed, Atom1Feed
 from functools import reduce  # forward compatibility for Python 3
-import operator
-import re
 from time import mktime
 
 

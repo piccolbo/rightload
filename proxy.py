@@ -3,9 +3,8 @@ from embedUI import embedUI
 from datastores import feed_db
 from feed2XML import feed2XML
 import feedcache
-from flask import request, Response, redirect
+from flask import request, redirect
 from ml import score_feed
-import shove
 from werkzeug.http import is_hop_by_hop_header
 
 

@@ -1,10 +1,7 @@
-from content_extraction import url2text
+from content_extraction import entry2text
 from InferSent.encoder import models as im
 from joblib import Memory
 from nltk.data import load as nltk_load
-from numpy import resize
-import os
-import re
 import torch
 
 _sent_detector = nltk_load('tokenizers/punkt/english.pickle')
@@ -34,18 +31,28 @@ _memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10**9)
 
 
 @_memory.cache(ignore=["entry"])
-def url2mat(url, entry=None):
-    return _text2mat(url2text(url, entry))
+def entry2mat(entry, url):
+    assert entry is not None
+    return _text2mat(entry2text(entry))
 
 
-def text2sentences(text, max_sentences=100):
+def url2mat(url):
+    return entry2mat(None, url)
+
+
+def text2sentences(text, max_sentences=300):  # limit to cap latency
     return _sent_detector.tokenize(text.strip())[:max_sentences]
 
 
+@_memory.cache
 def _text2mat(text):
-    sentences = text2sentences(text)  # limit to cap latency
+    sentences = text2sentences(text)
     _infersent.update_vocab(sentences, tokenize=True)
     if sentences:
         return _infersent.encode(sentences, tokenize=True)
     else:
         raise FailedExtraction
+
+
+class FailedExtraction(Exception):
+    pass

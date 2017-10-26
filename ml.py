@@ -1,21 +1,15 @@
-from feature_extraction import url2mat
+from feature_extraction import entry2mat, url2mat
 from collections import namedtuple
-from content_extraction import FailedExtraction
+from content_extraction import entry2url
 from datastores import training_db, model_db
-from debug import spy
 from flask import g
-from joblib import Memory
 import logging as log
 import numpy as np
-import os
 import sklearn.linear_model as lm
-import sklearn as sk
-from time import sleep
-import traceback
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
-_memory = Memory(cachedir="score-cache", verbose=1, bytes_limit=10**9)
+# _memory = Memory(cachedir="score-cache", verbose=1, bytes_limit=10**9)
 
 _model_attr_name = "_model"
 
@@ -40,17 +34,18 @@ def _new_model():
     return lm.LogisticRegression(class_weight='balanced', solver="lbfgs")
 
 
-@_memory.cache
+# @_memory.cache
 def _score_entry(entry):
+    url = entry2url(entry)
     try:
-        X = url2mat(entry.link, entry)
+        X = entry2mat(entry, url)
         probs = _get_model().predict_proba(X=X)[:, 1]
         # implicit feedback: if not overridden we assume prediction correct
         store_feedback(
-            url=entry.link, feedback=probs.mean() > 0.5, explicit=False)
+            url=url, feedback=probs.mean() > 0.5, explicit=False)
         return probs
     except Exception, e:
-        log.error("Failed Scoring for {link}".format(link=entry.link))
+        log.error("Failed Scoring for {url}".format(url=url))
         raise
 
 

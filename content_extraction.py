@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from boilerpipe.extract import Extractor
-from joblib import Memory
 import logging as log
 import numpy as np
+import re
 import requests
+from urlextract import URLExtract
 
 
 def _get_entry_content(entry):
@@ -12,6 +14,25 @@ def _get_entry_content(entry):
         entry.get("summary", "")
     ]
     return contents[np.argmax(map(len, contents))]
+
+
+def _get_first_url(text):
+    URLExtract().find_urls(text)[0]
+
+
+def _is_twitter(url):
+    return bool(re.search(r'twitter.com', url))  # quick and dirty
+
+
+def _escape_twitter(url):
+    # work in progress
+    if not _is_twitter(url):
+        return url
+    else:
+        try:
+            return _get_first_url(_url2text(url))
+        except Exception:
+            return url
 
 
 class FailedExtraction(Exception):
@@ -26,25 +47,49 @@ def _scrape(url=None, html=None):
         try:
             return Extractor(extractor='DefaultExtractor', html=html)
         except Exception as e:
-            log.warn("Can't extract html from {html}".format(html=html[:1000]))
+            log.warn("Can't extract html from {html}".format(html=html[:800]))
     else:
         try:
             return Extractor(extractor='DefaultExtractor', url=url)
         except Exception as e:
-            log.warn(
-                "Can't extract from {url} with boilerpipe".format(url=url))
+            log.warn(("Can't extract from {url} with boilerpipe " +
+                     "because of exception {e}").format(url=url, e=e))
             return _scrape(html=requests.get(url).content)
 
 
-_memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
+# _memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
 
 
-@_memory.cache(ignore=["entry"])
-def url2html(url, entry=None):
+def entry2url(entry):
+    url = entry.link
+    if _is_twitter(url):
+        try:
+            ex_url = _get_first_url(_get_entry_content(entry))
+            url = ex_url or url
+        except Exception:
+            pass
+    return url
+
+
+def entry2html(entry):
+    url = entry2url(entry)
+    return _url2html(None, entry) if _is_twitter(url) else _url2html(
+        url, entry)
+
+
+def entry2text(entry):
+    url = entry2url(entry)
+    return _url2text(None, entry) if _is_twitter(url) else _url2text(
+        url, entry)
+
+
+# @_memory.cache(ignore=["entry"])
+def _url2html(url, entry=None):
     try:
         html = _scrape(url=url).getHTML()
     except Exception as e:
-        log.warn("{url} can't be scraped\n".format(url=url))
+        log.warn("{url} can't be scraped because of exception {e}".format(
+            url=url, e=e))
         html = '<h1>{title}</h1>\n'.format(
             title=entry.title) + _get_entry_content(entry)
     if not html:
@@ -53,8 +98,8 @@ def url2html(url, entry=None):
     return html
 
 
-@_memory.cache(ignore=["entry"])
-def url2text(url, entry=None):
+# @_memory.cache(ignore=["entry"])
+def _url2text(url, entry=None):
     try:  # scrape url
         text = _scrape(url=url).getText()
         if len(text) < 40:
