@@ -52,3 +52,7 @@ def _text2mat(text):
         return _infersent.encode(sentences, tokenize=True)
     else:
         raise FailedExtraction
+
+
+class FailedExtraction(Exception):
+    pass
