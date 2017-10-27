@@ -1,3 +1,3 @@
 def spy(x):
-  print x
-  return x
+    print x
+    return x
