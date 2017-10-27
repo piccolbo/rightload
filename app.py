@@ -25,6 +25,7 @@ def _feed(url):
     return proxy(url)
 
 
+
 @app.route('/feedback/<feedback>/<path:url>')
 def _feedback(feedback, url):
     store_feedback(url=url, feedback=feedback == 'l', explicit=True)
