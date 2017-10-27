@@ -16,8 +16,10 @@ def _get_entry_content(entry):
     return contents[np.argmax(map(len, contents))]
 
 
-def _get_first_url(text):
-    URLExtract().find_urls(text)[0]
+def _get_first_non_twitter_url(text):
+    return [
+        url for url in URLExtract().find_urls(text) if not _is_twitter(url)
+    ][0]
 
 
 def _is_twitter(url):
@@ -50,9 +52,8 @@ def entry2url(entry):
     url = entry.link
     if _is_twitter(url):
         try:
-            ex_url = _get_first_url(_get_entry_content(entry))
-            url = ex_url or url
-        except Exception:
+            url = _get_first_non_twitter_url(_get_entry_content(entry))
+        except IndexError:
             pass
     return url
 
