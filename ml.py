@@ -45,7 +45,8 @@ def _score_entry(entry):
             url=url, feedback=probs.mean() > 0.5, explicit=False)
         return probs
     except Exception, e:
-        log.error("Failed Scoring for {url}".format(url=url))
+        log.error(("Failed Scoring for {url}" +
+                  " because of exception {e}").format(url=url, e=e))
         raise
 
 
