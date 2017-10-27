@@ -24,17 +24,6 @@ def _is_twitter(url):
     return bool(re.search(r'twitter.com', url))  # quick and dirty
 
 
-def _escape_twitter(url):
-    # work in progress
-    if not _is_twitter(url):
-        return url
-    else:
-        try:
-            return _get_first_url(_url2text(url))
-        except Exception:
-            return url
-
-
 class FailedExtraction(Exception):
     pass
 
@@ -55,9 +44,6 @@ def _scrape(url=None, html=None):
             log.warn(("Can't extract from {url} with boilerpipe " +
                      "because of exception {e}").format(url=url, e=e))
             return _scrape(html=requests.get(url).content)
-
-
-# _memory = Memory(cachedir="content-cache", verbose=1, bytes_limit=10**9)
 
 
 def entry2url(entry):
@@ -83,7 +69,6 @@ def entry2text(entry):
         url, entry)
 
 
-# @_memory.cache(ignore=["entry"])
 def _url2html(url, entry=None):
     try:
         html = _scrape(url=url).getHTML()
@@ -98,7 +83,6 @@ def _url2html(url, entry=None):
     return html
 
 
-# @_memory.cache(ignore=["entry"])
 def _url2text(url, entry=None):
     try:  # scrape url
         text = _scrape(url=url).getText()
