@@ -44,7 +44,7 @@ def _scrape(url=None, html=None):
             return Extractor(extractor='DefaultExtractor', url=url)
         except Exception as e:
             log.warn(("Can't extract from {url} with boilerpipe " +
-                     "because of exception {e}").format(url=url, e=e))
+                      "because of exception {e}").format(url=url, e=e))
             return _scrape(html=requests.get(url).content)
 
 
