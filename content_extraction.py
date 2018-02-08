@@ -81,7 +81,7 @@ def entry2url(entry):
         except IndexError:
             pass
         except Exception as e:
-            log.warn(("Can't get external link from {url} " +
+            log.warn((u"Can't get external link from {url} " +
                       "because of exception {e}").format(url=url, e=e))
     return url
 
