@@ -1,4 +1,5 @@
 # ingredients:   tinydb joblib.Memory
+from datastores import feed_db
 from flask import Flask
 from ml import store_feedback
 from ml import learn
@@ -60,6 +61,17 @@ def _feedback(feedback, url):
 @app.route('/learn')
 def _learn():
     learn()
+    return ("Done", 204, {})
+
+
+@app.route('/preload')
+def _preload():
+    for url in feed_db().keys():
+        try:
+            proxy(url)
+        except Exception:
+            log.warning("Couldn't preload %s", url)
+
     return ("Done", 204, {})
 
 
