@@ -4,22 +4,26 @@ from datastores import feed_db
 from feed2XML import feed2XML
 import feedcache
 from flask import request, redirect
+import logging as log
 from ml import score_feed
 from werkzeug.http import is_hop_by_hop_header
 
 
 def proxy(url):
+    log.info("Processing %s?%s", url, request.query_string)
     if request.method == 'GET':
         parsed_feed = feedcache.Cache(feed_db()).fetch(
             '?'.join(filter(None, [url, request.query_string])),
             force_update=False
         )  # defaults: force_update = False, offline = False
-
         # return content
         status = parsed_feed.get('status', 404)
         if status >= 400:  # deal with errors
             response = ("External error", status, {})
         elif status >= 300:  # deal with redirects
+            if status == 301:
+                log.warn("Permanent redirect from %s to %s", url,
+                         parsed_feed.href)
             return redirect("/feed/{reurl}".format(reurl=parsed_feed.href))
         else:
             etag = request.headers.get('IF_NONE_MATCH')
