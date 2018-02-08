@@ -1,5 +1,5 @@
 import BeautifulSoup as bs
-from content_extraction import entry2url, entry2text
+from content_extraction import entry2url, entry2text, entry2html
 from colour import Color
 from feature_extraction import text2sentences
 from flask import request
@@ -66,16 +66,15 @@ def _add_bar(text, mean_score, content_link):
 
 def _embedUI_entry(entry, score):
     mean_score = score.mean()
-    text = entry2text(entry)
-    high_text = _highlight_text(text, score)
-    # html = entry2html(entry)
-    # high_html = _highlight_html(html, text, score)
+    # body = entry2text(entry)
+    # body = _highlight_text(text, score)
+    body = entry2html(entry)
+    # body = _highlight_html(html, text, score)
     url = entry2url(entry)
     if u'description' in entry:
-        entry[u'description'] = _add_bar(high_text, mean_score, url)
+        entry[u'description'] = _add_bar(body, mean_score, url)
     if u'content' in entry:
-        entry[u'content'][0].value = _add_bar(high_text, mean_score, url)
-        entry[u'content'][0].value = _add_bar(high_text, mean_score, url)
+        entry[u'content'][0].value = _add_bar(body, mean_score, url)
     if u'title' in entry:
         entry[u'title'] = u"{mean_score:} | {title}".format(
             mean_score=int(mean_score * 100), title=entry[u'title'])
