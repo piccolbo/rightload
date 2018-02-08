@@ -25,6 +25,11 @@ def _feed(url):
     return proxy(url)
 
 
+@app.route('/medium/<string:id>')
+def _medium(id):
+    return proxy('https://medium.com/feed/@' + id)
+
+
 @app.route('/twitter/<string:id>')
 def _twitter(id):
     return proxy('https://twitrss.me/twitter_user_to_rss/?user=' + id)
