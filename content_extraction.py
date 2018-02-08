@@ -99,15 +99,19 @@ def entry2text(entry):
 
 
 def _url2html(url, entry=None):
-    try:
-        html = _scrape_url(url).getHTML()
-    except Exception as e:
-        log.warn("{url} can't be scraped because of exception {e}".format(
-            url=url, e=e))
-        html = '<h1>{title}</h1>\n'.format(
+    html = None
+    if url is not None:
+        try:
+            html = _scrape_url(url).getHTML()
+        except Exception as e:
+            log.warn(u"{url} can't be scraped because of exception {e}".format(
+                url=url, e=e))
+    if entry is not None:
+        html = u'<h1>{title}</h1>\n'.format(
             title=entry.title) + _get_entry_content(entry)
     if not html:
-        log.error("Could not extract any html for for {url}".format(url=url))
+        log.error("Could not extract any html for for {url} or {link}".format(
+            url=url, link=getattr(entry, "link")))
         raise FailedExtraction
     return html
 
