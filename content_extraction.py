@@ -106,7 +106,7 @@ def _url2html(url, entry=None):
         except Exception as e:
             log.warn(u"{url} can't be scraped because of exception {e}".format(
                 url=url, e=e))
-    if entry is not None:
+    if html is None and entry is not None:
         html = u'<h1>{title}</h1>\n'.format(
             title=entry.title) + _get_entry_content(entry)
     if not html:
