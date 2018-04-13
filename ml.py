@@ -108,19 +108,29 @@ def learn():
         A message about the learning process containing a score.
 
     """
+    log.info("Loading data")
     Xy = [
-        dict(X=X, y=[int(feedback)] * X.shape[0])
-        for X, feedback in [(_url2mat_or_None(url), feedback)
-                            for url, (feedback,
-                                      _) in list(training_db().iteritems())]
-        if X is not None
+        dict(
+            X=X,
+            y=[int(feedback)] * X.shape[0],
+            explicit=[explicit] * X.shape[0])
+        for X, feedback, explicit in [(
+            _url2mat_or_None(url), feedback,
+            explicit) for url, (feedback,
+                                explicit) in training_db().iteritems()]
+        if (X is not None)
     ]
+    log.info("Forming matrices")
     X = np.concatenate([z['X'] for z in Xy], axis=0)
     y = np.concatenate([z['y'] for z in Xy], axis=0)
-    # w = np.concatenate(
-    #     [[1.0 / z['X'].shape[0]] * z['X'].shape[0] for z in Xyw], axis=0)
+    explicit = np.concatenate([z["explicit"] for z in Xy], axis=0)
+    N = 100000  # as many as can fit in 15 GB RAM. Overkill.
+    mask = (np.random.uniform(size=len(y)) < (float(N) / len(y))) | explicit
+    X = X[mask, :]
+    y = y[mask]
     del Xy
     gc.collect()  # Trying to get as much RAM as possible before model fit
+    log.info("Creating model")
     model = _new_model()
     model.fit(X=X, y=y)  # , sample_weight=w)
 
