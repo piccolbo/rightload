@@ -24,13 +24,7 @@ def _set_model(model):
 
 
 def _get_model():
-    model = getattr(g, _model_attr_name, None)
-    if model is None:
-        model = model_db().get("user", None)
-        if model is None:
-            model = _new_model()
-        _set_model(model)
-    return model
+    return getattr(g, _model_attr_name, None) or model_db().get("user")
 
 
 def _new_model():
