@@ -8,6 +8,7 @@ import gc
 import logging as log
 import numpy as np
 import sklearn.linear_model as lm
+# import sklearn.ensemble as sken
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
@@ -34,6 +35,12 @@ def _get_model():
 
 def _new_model():
     return lm.LogisticRegression(class_weight='balanced', solver="lbfgs")
+    # return sken.RandomForestClassifier(
+    #     n_estimators=100,
+    #     min_samples_split=.1,
+    #     class_weight="balanced",
+    #     oob_score=True,
+    #     n_jobs=-1)
 
 
 # @_memory.cache
