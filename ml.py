@@ -7,8 +7,8 @@ from flask import g
 import gc
 import logging as log
 import numpy as np
-import sklearn.linear_model as lm
 # import sklearn.ensemble as sken
+from sklearn import linear_model as lm
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
 
