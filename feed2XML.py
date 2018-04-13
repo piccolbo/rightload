@@ -21,10 +21,10 @@ def feed2XML(parsed_feed):
         **dict(zip(map(str, pf.keys()), pf.values())))
     for e in parsed_feed.entries:
         add_args = _map_entry_structure(_field_map, e)
-        if 'published_parsed' in e:
+        if 'published_parsed' in e and e['published_parsed'] is not None:
             add_args['pubdate'] = datetime.fromtimestamp(
                 mktime(e['published_parsed']))
-        if 'updated_parsed' in e:
+        if 'updated_parsed' in e and e['updated_parsed'] is not None:
             add_args['updateddate'] = datetime.fromtimestamp(
                 mktime(e['updated_parsed']))
         feed.add_item(**add_args)
