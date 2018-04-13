@@ -1,5 +1,6 @@
+"""Insert feedback UI in feed entry."""
 import BeautifulSoup as bs
-from content_extraction import entry2url, entry2text, entry2html
+from content_extraction import entry2url, entry2html
 from colour import Color
 from feature_extraction import text2sentences
 from flask import request
@@ -82,6 +83,21 @@ def _embedUI_entry(entry, score):
 
 
 def embedUI(parsed_feed, score):
+    """Insert a UI element in each entry of a feed.
+
+    Parameters
+    ----------
+    parsed_feed : feedparser.
+        Description of parameter `parsed_feed`.
+    score : type
+        Description of parameter `score`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
     parsed_feed.entries = [
         _embedUI_entry(e, s) for e, s in zip(parsed_feed.entries, score)
     ]
