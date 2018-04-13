@@ -4,6 +4,7 @@ from collections import namedtuple
 from content_extraction import entry2url
 from datastores import training_db, model_db
 from flask import g
+import gc
 import logging as log
 import numpy as np
 import sklearn.linear_model as lm
@@ -81,6 +82,8 @@ def learn():
     y = np.concatenate([z['y'] for z in Xy], axis=0)
     # w = np.concatenate(
     #     [[1.0 / z['X'].shape[0]] * z['X'].shape[0] for z in Xyw], axis=0)
+    del Xy
+    gc.collect()  # Trying to get as much RAM as possible before model fit
     model = _new_model()
     model.fit(X=X, y=y)  # , sample_weight=w)
 
