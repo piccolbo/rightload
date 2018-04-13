@@ -132,10 +132,10 @@ def learn():
     gc.collect()  # Trying to get as much RAM as possible before model fit
     log.info("Creating model")
     model = _new_model()
-    model.fit(X=X, y=y)  # , sample_weight=w)
-
+    log.info("Fitting model")
+    log.info("Matrix size:" + str(X.shape))
+    model.fit(X=X, y=y)
     _set_model(model)
-
     msg = "Classifier Score: {score}".format(score=model.score(X=X, y=y))
     log.info(msg)
     return msg
