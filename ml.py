@@ -53,10 +53,40 @@ def _score_entry(entry):
 
 
 def score_feed(parsed_feed):
+    """Score each entry in a feed.
+
+    Parameters
+    ----------
+    parsed_feed : Feedparser feed
+        The feed whose entries are to be scored.
+
+    Returns
+    -------
+    type
+        A list of scores, one per entry. Higher score means more likely to
+        receive positive feedback.
+
+    """
     return [_score_entry(e) for e in parsed_feed.entries]
 
 
 def store_feedback(url, feedback, explicit):
+    """Store user feedback.
+
+    Parameters
+    ----------
+    url : string
+        URL of content feedback is about.
+    feedback : string
+        "l" or "d" for "like" or "dislike".
+    explicit : bool
+        Whether the feedback corresponded to an actual click or is indirect.
+
+    Returns
+    -------
+    None
+
+    """
     # explicit overwrites anything
     if (training_db().get(url) is None) or explicit:
         training_db()[url] = Feedback(feedback=feedback, explicit=explicit)
@@ -71,6 +101,14 @@ def _url2mat_or_None(url):
 
 
 def learn():
+    """Trigger the learning process.
+
+    Returns
+    -------
+    string
+        A message about the learning process containing a score.
+
+    """
     Xy = [
         dict(X=X, y=[int(feedback)] * X.shape[0])
         for X, feedback in [(_url2mat_or_None(url), feedback)
