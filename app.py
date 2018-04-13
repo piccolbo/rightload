@@ -1,3 +1,4 @@
+"""App start and route definitions."""
 # ingredients:   tinydb joblib.Memory
 from datastores import feed_db
 from flask import Flask
@@ -71,7 +72,6 @@ def _preload():
             proxy(url)
         except Exception:
             log.warning("Couldn't preload %s", url)
-
     return ("Done", 204, {})
 
 
