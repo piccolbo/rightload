@@ -1,3 +1,4 @@
+"""Proxy logic."""
 import copy
 from embedUI import embedUI
 from datastores import feed_db
