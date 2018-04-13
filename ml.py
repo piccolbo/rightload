@@ -1,3 +1,4 @@
+"""ML component."""
 from feature_extraction import entry2mat, url2mat
 from collections import namedtuple
 from content_extraction import entry2url
