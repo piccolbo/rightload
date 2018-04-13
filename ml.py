@@ -11,9 +11,6 @@ import numpy as np
 from sklearn import linear_model as lm
 
 Feedback = namedtuple("Feedback", ["feedback", "explicit"])
-
-# _memory = Memory(cachedir="score-cache", verbose=1, bytes_limit=10**9)
-
 _model_attr_name = "_model"
 
 
