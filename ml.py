@@ -43,12 +43,12 @@ def _score_entry(entry):
         X = entry2mat(entry, url)
         probs = _get_model().predict_proba(X=X)[:, 1]
         # implicit feedback: if not overridden we assume prediction correct
-        store_feedback(
-            url=url, feedback=probs.mean() > 0.5, explicit=False)
+        store_feedback(url=url, feedback=probs.mean() > 0.5, explicit=False)
         return probs
-    except Exception, e:
-        log.error(("Failed Scoring for {url}" +
-                  " because of exception {e}").format(url=url, e=e))
+    except Exception as e:
+        log.error(
+            ("Failed Scoring for {url}" + " because of exception {e}").format(
+                url=url, e=e))
         raise
 
 
