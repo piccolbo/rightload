@@ -34,7 +34,8 @@ def _get_model():
 
 
 def _new_model():
-    return lm.LogisticRegression(class_weight='balanced', solver="lbfgs")
+    return lm.LogisticRegressionCV(
+        class_weight='balanced', solver="sag", verbose=1, n_jobs=-1)
     # return sken.RandomForestClassifier(
     #     n_estimators=100,
     #     min_samples_split=.1,
