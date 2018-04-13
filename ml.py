@@ -138,4 +138,5 @@ def learn():
     _set_model(model)
     msg = "Classifier Score: {score}".format(score=model.score(X=X, y=y))
     log.info(msg)
+    # log.info(model.oob_score_) # this is for RF
     return msg
