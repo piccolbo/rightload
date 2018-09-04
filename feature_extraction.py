@@ -28,6 +28,7 @@ _infersent.set_glove_path('InferSent/dataset/GloVe/glove.840B.300d.txt')
 _infersent.build_vocab_k_words(K=1)
 
 _memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10**9)
+_memory.reduce_size()
 
 
 @_memory.cache(ignore=["entry"])
