@@ -121,8 +121,8 @@ def learn():
         if (X is not None)
     ]
     log.info("Forming matrices")
-    X = np.concatenate([z['X'] for z in Xy], axis=0)
-    y = np.concatenate([z['y'] for z in Xy], axis=0)
+    X = np.concatenate([z["X"] for z in Xy], axis=0)
+    y = np.concatenate([z["y"] for z in Xy], axis=0)
     explicit = np.concatenate([z["explicit"] for z in Xy], axis=0)
     N = 100000  # as many as can fit in 15 GB RAM. Overkill.
     mask = (np.random.uniform(size=len(y)) < (float(N) / len(y))) | explicit
