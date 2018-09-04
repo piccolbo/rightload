@@ -124,7 +124,7 @@ def learn():
     X = np.concatenate([z["X"] for z in Xy], axis=0)
     y = np.concatenate([z["y"] for z in Xy], axis=0)
     explicit = np.concatenate([z["explicit"] for z in Xy], axis=0)
-    N = 100000  # as many as can fit in 15 GB RAM. Overkill.
+    N = 0  # smaller number for faster response
     mask = (np.random.uniform(size=len(y)) < (float(N) / len(y))) | explicit
     X = X[mask, :]
     y = y[mask]
