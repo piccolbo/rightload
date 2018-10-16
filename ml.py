@@ -25,13 +25,10 @@ def _get_model():
 
 
 def _new_model():
-    return lm.LogisticRegressionCV(solver="sag", verbose=1, n_jobs=-1)
-    # return sken.RandomForestClassifier(
-    #     n_estimators=100,
-    #     min_samples_split=.1,
-    #     class_weight="balanced",
-    #     oob_score=True,
-    #     n_jobs=-1)
+    # return lm.LogisticRegressionCV(solver="sag", verbose=1, n_jobs=-1)
+    return sken.RandomForestClassifier(
+        n_estimators=100, oob_score=True, max_features=300, n_jobs=-1
+    )
 
 
 # @_memory.cache
