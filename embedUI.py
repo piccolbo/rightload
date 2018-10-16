@@ -11,8 +11,14 @@ from traceback import format_exc
 
 
 def _feedbackurl(link, well_spent):
-    return (u"http://" + request.host + u"/feedback/" +
-            (u"l" if well_spent else u"d") + u"/" + link)
+    return (
+        u"http://"
+        + request.host
+        + u"/feedback/"
+        + (u"l" if well_spent else u"d")
+        + u"/"
+        + link
+    )
 
 
 def _is_long(text):
@@ -25,12 +31,12 @@ def _p(style, text):
 
 def _a(href, target, text):
     return u'<a href="{href}" target="{target}">{text}</a>'.format(
-        href=href, target=target, text=text)
+        href=href, target=target, text=text
+    )
 
 
 def _font(color, text):
-    return u'<font color="{color}">{text}</font>'.format(
-        color=color, text=text)
+    return u'<font color="{color}">{text}</font>'.format(color=color, text=text)
 
 
 def _span(text, color):
@@ -38,7 +44,7 @@ def _span(text, color):
     # style = u'"text-decoration: underline; text-decoration-color: {color}"'
     style = u'"background-color: {color};  line-height: auto"'
     style = style.format(color=color)
-    return u'<span style={style}>{text}</span>'.format(text=text, style=style)
+    return u"<span style={style}>{text}</span>".format(text=text, style=style)
 
 
 def _feedback_link(is_good, content_link):
@@ -47,22 +53,23 @@ def _feedback_link(is_good, content_link):
         target=u"_top",
         text=_font(
             color=u"green" if is_good else u"red",
-            text=u"Time Well Spent" if is_good else u"Time Wasted"))
+            text=u"Time Well Spent" if is_good else u"Time Wasted",
+        ),
+    )
 
 
 def _conditional_bar(mean_score, content_link):
     return _p(
         style=u"BACKGROUND-COLOR: #DBDBDB",
-        text=(_feedback_link(True, content_link)
-              if mean_score <= 0.5 else u'') +
-        (u" or "
-         if mean_score == 0.5 else u"") + (_feedback_link(False, content_link)
-                                           if mean_score >= 0.5 else u''))
+        text=(_feedback_link(True, content_link) if mean_score <= 0.5 else u"")
+        + (u" or " if mean_score == 0.5 else u"")
+        + (_feedback_link(False, content_link) if mean_score >= 0.5 else u""),
+    )
 
 
 def _add_bar(text, mean_score, content_link):
     bar = _conditional_bar(mean_score, content_link)
-    return bar + text + (bar if _is_long(text) else u'')
+    return bar + text + (bar if _is_long(text) else u"")
 
 
 def _embedUI_entry(entry, score):
@@ -72,13 +79,14 @@ def _embedUI_entry(entry, score):
     # body = entry2html(entry)
     # body = _highlight_html(html, text, score) #broken
     url = entry2url(entry)
-    if u'description' in entry:
-        entry[u'description'] = _add_bar(body, mean_score, url)
-    if u'content' in entry:
-        entry[u'content'][0].value = _add_bar(body, mean_score, url)
-    if u'title' in entry:
-        entry[u'title'] = u"{mean_score:} | {title}".format(
-            mean_score=int(mean_score * 100), title=entry[u'title'])
+    if u"description" in entry:
+        entry[u"description"] = _add_bar(body, mean_score, url)
+    if u"content" in entry:
+        entry[u"content"][0].value = _add_bar(body, mean_score, url)
+    if u"title" in entry:
+        entry[u"title"] = u"{mean_score:} | {title}".format(
+            mean_score=int(mean_score * 100), title=entry[u"title"]
+        )
     return entry
 
 
@@ -104,26 +112,26 @@ def embedUI(parsed_feed, score):
     return parsed_feed
 
 
-_colors = list(Color(hsl=(0.8, 1, 1)).range_to(Color(hsl=(0.8, 1, 0.7)), 256))
+_colors = list(Color(hsl=(0.8, 1, 1)).range_to(Color(hsl=(0.8, 1, 0.8)), 256))
 
 
 def _score2color(score):
-    return _colors[int(score * 256)].get_hex_l()
+    return _colors[min(int(score * 256), 255)].get_hex_l()
 
 
 def _highlight_text(text, score):
     try:
         sentences = text2sentences(text)
-        return u"".join(
-            [_highlight_sentence(x, s) for x, s in zip(sentences, score)])
+        return u"".join([_highlight_sentence(x, s) for x, s in zip(sentences, score)])
     except Exception:
         log.error(format_exc())
         return text
 
 
 def _highlight_sentence(sentence, score):
-    return _span(u"<sup>{s:.2f}</sup> {x}".format(x=sentence, s=score),
-                 _score2color(score))
+    return _span(
+        u"<sup>{s:.2f}</sup> {x}".format(x=sentence, s=score), _score2color(score)
+    )
 
 
 def _best_match_score(x, sentences, score):
@@ -138,6 +146,7 @@ def _highlight_html(html, text, score):
     for x in soup.findAll(text=True):
         x.replaceWith(
             bs.BeautifulSoup(
-                _highlight_sentence(x, _best_match_score(x, sentences,
-                                                         score))))
+                _highlight_sentence(x, _best_match_score(x, sentences, score))
+            )
+        )
     return unicode(soup)
