@@ -1,6 +1,5 @@
 """ML component."""
 from feature_extraction import entry2mat, url2mat
-from collections import namedtuple
 from content_extraction import entry2url
 from datastores import training_db, model_db
 from flask import g
@@ -8,10 +7,10 @@ import gc
 import logging as log
 import numpy as np
 
-# import sklearn.ensemble as sken
-from sklearn import linear_model as lm
+import sklearn.ensemble as sken
 
-Feedback = namedtuple("Feedback", ["feedback", "explicit"])
+#  from sklearn import linear_model as lm
+
 _model_attr_name = "_model"
 
 
@@ -40,10 +39,9 @@ def _score_entry(entry):
     url = entry2url(entry)
     try:
         X = entry2mat(entry, url)
-        probs = _get_model().predict_proba(X=X)[:, 1]
-        # implicit feedback: if not overridden we assume prediction correct
-        store_feedback(url=url, feedback=probs.mean() > 0.5, explicit=False)
-        return probs
+        model = _get_model()
+        probs = model.predict_proba(X=X)
+        return probs[:, 1]
     except Exception as e:
         log.error(
             ("Failed Scoring for {url}" + " because of exception {e}").format(
@@ -69,33 +67,33 @@ def score_feed(parsed_feed):
     return [_score_entry(e) for e in parsed_feed.entries]
 
 
-def store_feedback(url, feedback, explicit):
+def store_feedback(url, like):
     """Store user feedback.
 
     Parameters
     ----------
     url : string
         URL of content feedback is about.
-    feedback : string
-        "l" or "d" for "like" or "dislike".
-    explicit : bool
-        Whether the feedback corresponded to an actual click or is indirect.
+    like : bool
+        True for like, False for dislike.
 
     Returns
     -------
     None
 
     """
-    # explicit overwrites anything
-    if (training_db().get(url) is None) or explicit:
-        training_db()[url] = Feedback(feedback=feedback, explicit=explicit)
-        training_db().sync()
+
+    training_db()[url] = like
+    training_db().sync()
 
 
 def _url2mat_or_None(url):
     try:
         return url2mat(url)
     except Exception:
+        # del training_db()[url] this is too hasty, erasing valuable human
+        # feedback
+        training_db().sync()
         return None
 
 
@@ -110,24 +108,15 @@ def learn():
     """
     log.info("Loading data")
     Xy = [
-        dict(
-            X=X,
-            y=[int(feedback)] * X.shape[0],
-            explicit=[explicit] * X.shape[0])
-        for X, feedback, explicit in [(
-            _url2mat_or_None(url), feedback,
-            explicit) for url, (feedback,
-                                explicit) in training_db().iteritems()]
+        dict(X=X, y=[int(like)] * X.shape[0])
+        for X, like in [
+            (_url2mat_or_None(url), like) for url, like in training_db().iteritems()
+        ]
         if (X is not None)
     ]
     log.info("Forming matrices")
     X = np.concatenate([z["X"] for z in Xy], axis=0)
     y = np.concatenate([z["y"] for z in Xy], axis=0)
-    explicit = np.concatenate([z["explicit"] for z in Xy], axis=0)
-    N = 0  # smaller number for faster response
-    mask = (np.random.uniform(size=len(y)) < (float(N) / len(y))) | explicit
-    X = X[mask, :]
-    y = y[mask]
     del Xy
     gc.collect()  # Trying to get as much RAM as possible before model fit
     log.info("Creating model")
