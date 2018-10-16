@@ -41,7 +41,9 @@ def _score_entry(entry):
     except Exception as e:
         log.error(
             ("Failed Scoring for {url}" + " because of exception {e}").format(
-                url=url, e=e))
+                url=url, e=e
+            )
+        )
         raise
 
 
