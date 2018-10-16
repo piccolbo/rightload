@@ -31,7 +31,6 @@ def _new_model():
     )
 
 
-# @_memory.cache
 def _score_entry(entry):
     url = entry2url(entry)
     try:
