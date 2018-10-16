@@ -14,35 +14,34 @@ log.basicConfig(filename="./log", level=log.INFO)
 
 # create a Trace object, telling it what to ignore, and whether to
 # do tracing or line-counting or both.
-_tracer = trace.Trace(
-    ignoredirs=[sys.prefix, sys.exec_prefix], trace=1, count=0)
+_tracer = trace.Trace(ignoredirs=[sys.prefix, sys.exec_prefix], trace=1, count=0)
 
 app = Flask(__name__)
 
 # app.wsgiapp = ProfilerMiddleware(app.wsgiapp)
 
 
-@app.route('/feed/<path:url>')
+@app.route("/feed/<path:url>")
 def _feed(url):
     return proxy(url)
 
 
-@app.route('/medium/<string:id>')
+@app.route("/medium/<string:id>")
 def _medium(id):
-    return proxy('https://medium.com/feed/@' + id)
+    return proxy("https://medium.com/feed/@" + id)
 
 
-@app.route('/twitter/<string:id>')
+@app.route("/twitter/<string:id>")
 def _twitter(id):
-    return proxy('https://twitrss.me/twitter_user_to_rss/?user=' + id)
+    return proxy("https://twitrss.me/twitter_user_to_rss/?user=" + id)
 
 
-@app.route('/feedback/<feedback>/<path:url>')
+@app.route("/feedback/<feedback>/<path:url>")
 def _feedback(feedback, url):
-    store_feedback(url=url, feedback=feedback == 'l', explicit=True)
-    log.info("storing feedback {feedback} for {url}".format(
-        feedback=feedback, url=url))
-    return ('''
+    store_feedback(url=url, like=feedback == "l")
+    log.info("storing feedback {feedback} for {url}".format(feedback=feedback, url=url))
+    return (
+        """
     <!DOCTYPE html
            PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -56,16 +55,19 @@ def _feedback(feedback, url):
     <h1>Thank you for your feedback, your filter has been updated</h1>
     </body>
     </html>
-    ''', 200, {})
+    """,
+        200,
+        {},
+    )
 
 
-@app.route('/learn')
+@app.route("/learn")
 def _learn():
     learn()
     return ("Done", 204, {})
 
 
-@app.route('/preload')
+@app.route("/preload")
 def _preload():
     for url in feed_db().keys():
         try:
@@ -75,5 +77,5 @@ def _preload():
     return ("Done", 204, {})
 
 
-if __name__ == 'main':
+if __name__ == "main":
     app.run()
