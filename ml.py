@@ -44,7 +44,7 @@ def _score_entry(entry):
                 url=url, e=e
             )
         )
-        return np.array([1.01] * X.shape[0])
+        raise
 
 
 def score_feed(parsed_feed):
