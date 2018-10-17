@@ -1,6 +1,7 @@
 """App start and route definitions."""
 # ingredients:   tinydb joblib.Memory
 from datastores import feed_db
+from datetime import date, timedelta
 from flask import Flask
 from ml import store_feedback
 from ml import learn
@@ -9,11 +10,11 @@ import sys
 import trace
 import logging as log
 
-#
-# from decorate_module import decorate_all_in_module, log_decorator
-# import content_extraction as ce
-#
-# decorate_all_in_module(ce, log_decorator)
+from rl_logging import decorate_all_in_module, log_on_fail
+import content_extraction as ce
+
+
+decorate_all_in_module(ce, log_on_fail)
 
 
 # should be set at the project level
@@ -39,14 +40,20 @@ def _medium(id):
 
 
 @app.route("/twitter/<string:id>")
-def _twitter(id):
-    return proxy("https://twitrss.me/twitter_user_to_rss/?user=" + id)
+def _twitter(id, date=lambda: (date.today() - timedelta(days=10)).strftime("%Y-%m-%d")):
+    date = date()
+    return proxy(
+        "https://twitrss.me/twitter_search_to_rss/"
+        + "?term=from%3A{id}+since%3A{date}".format(id=id, date=date)
+    )
 
 
 @app.route("/feedback/<feedback>/<path:url>")
 def _feedback(feedback, url):
     store_feedback(url=url, like=feedback == "l")
-    log.info("storing feedback {feedback} for {url}".format(feedback=feedback, url=url))
+    log.info(
+        u"storing feedback {feedback} for {url}".format(feedback=feedback, url=url)
+    )
     return (
         """
     <!DOCTYPE html
