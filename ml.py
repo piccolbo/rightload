@@ -40,7 +40,7 @@ def _score_entry(entry):
         return probs[:, 1]
     except Exception as e:
         log.error(
-            ("Failed Scoring for {url}" + " because of exception {e}").format(
+            (u"Failed Scoring for {url}" + u" because of exception {e}").format(
                 url=url, e=e
             )
         )
