@@ -1,6 +1,6 @@
 """ML component."""
 from feature_extraction import entry2mat, url2mat
-from content_extraction import entry2url
+from content_extraction import get_url
 from datastores import training_db, model_db
 from flask import g
 import gc
@@ -32,7 +32,7 @@ def _new_model():
 
 
 def _score_entry(entry):
-    url = entry2url(entry)
+    url = get_url(entry)
     try:
         X = entry2mat(entry, url)
         model = _get_model()
@@ -44,7 +44,7 @@ def _score_entry(entry):
                 url=url, e=e
             )
         )
-        raise
+        return np.array([1.01] * X.shape[0])
 
 
 def score_feed(parsed_feed):

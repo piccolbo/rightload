@@ -1,6 +1,6 @@
 """Insert feedback UI in feed entry."""
 import BeautifulSoup as bs
-from content_extraction import entry2url, entry2text
+from content_extraction import get_text, get_url
 from colour import Color
 from feature_extraction import text2sentences
 from flask import request
@@ -75,10 +75,10 @@ def _add_bar(text, mean_score, content_link):
 def _embedUI_entry(entry, score):
     mean_score = score.mean()
     # body = entry2text(entry)
-    body = _highlight_text(entry2text(entry), score)
-    # body = entry2html(entry)
+    body = _highlight_text(get_text(entry=entry), score)
+    # body = get_html(entry=entry)
     # body = _highlight_html(html, text, score) #broken
-    url = entry2url(entry)
+    url = get_url(entry)
     if u"description" in entry:
         entry[u"description"] = _add_bar(body, mean_score, url)
     if u"content" in entry:
@@ -122,7 +122,12 @@ def _score2color(score):
 def _highlight_text(text, score):
     try:
         sentences = text2sentences(text)
-        return u"".join([_highlight_sentence(x, s) for x, s in zip(sentences, score)])
+        return u"".join(
+            [
+                _highlight_sentence(x, s)
+                for x, s in map(lambda a, x: (a, x or 0), sentences, score)
+            ]
+        )
     except Exception:
         log.error(format_exc())
         return text

@@ -1,142 +1,177 @@
-# -*- coding: utf-8 -*-
+"""
+General organization of content extraction. Starting from an entry,
+there are two avenues to get text out, one through the entry itself,
+the other through its link. Also in the implementation different libs are applied, for now boilerpipe and textract, complicating the picture
+
+
+"""
+
 from boilerpipe.extract import Extractor
 import logging as log
 import mimeparse
-import numpy as np
 import re
 import requests
-from urlextract import URLExtract
-import textract
 import tempfile
+import textract
+from toolz.functoolz import excepts, partial
+from urlextract import URLExtract
 
 
-def _get_entry_content(entry):
-    contents = [
-        entry.get("description", ""),
-        entry.get("content", [{}])[0].get("value", ""),
-        entry.get("summary", "")
-    ]
-    return contents[np.argmax(map(len, contents))]
+def get_html(url=None, entry=None):
+    """
+    Give me the content of the url or entry, to display in feed reader
+    """
+    assert url is not None or entry is not None
+    return _url2html(url) if entry is None else _entry2html(entry)
 
 
-def _get_first_non_twitter_url(text):
-    return [
-        url for url in URLExtract().find_urls(text) if not _is_twitter(url)
-    ][0]
+def get_text(url=None, entry=None):
+    """
+    Give me text associated with url or entry, for display or ML use
+    """
+    if url is None:
+        url = get_url(entry)
+    return _warn_short(
+        _keep_longest(
+            lambda: _url2text(url),
+            lambda: _entry2text(entry) if entry is not None else "",
+        )
+    )
+
+
+def _entry2html(entry):
+    return _entry2html_fields(entry)
+
+
+def _entry2text(entry):
+    return _html2text(_entry2html(entry))
+
+
+def get_url(entry):
+    url = entry.link
+    return _entry2url_twitter(entry) if _is_twitter(url) else url
+
+
+def _entry2url_twitter(entry):
+    url = entry.link
+    try:
+        url = _get_first_non_twitter_url(_entry2html_fields(entry))
+    except IndexError:
+        pass
+    return url
+
+
+def _url2content(url, check_html=False):
+    response = requests.get(url)
+    doc_type = _get_doc_type(response)
+    assert (not check_html) or (doc_type == "html")
+    data = (
+        unicode(response.content, encoding=response.encoding)
+        if response.encoding is not None
+        else response.content
+    )
+    return data, doc_type
+
+
+def _url2html(url):
+    return _keep_longest(
+        lambda: _url2content(url, check_html=True), lambda: _url2html_bp(url)
+    )
+
+
+def _url2text(url):
+    return _keep_first(
+        lambda: _url2text_bp(url), lambda: _content2text_te(_url2content(url))
+    )
+
+
+def _html2text(html):
+    return _html2text_bp(html)
+
+
+def _url2text_bp(url):
+    return _bp_extractor(url=url).getText()
+
+
+def _url2html_bp(url):
+    return _bp_extractor(url=url).getHTML()
+
+
+def _html2text_bp(html):
+    return _bp_extractor(html=html).getText()
+
+
+def _content2text_te(content):
+    data, doc_type = content
+    with tempfile.NamedTemporaryFile(mode="wb", suffix="." + doc_type) as fh:
+        fh.write(data)
+        fh.flush()
+        return unicode(textract.process(fh.name, encoding="utf-8"), encoding="utf-8")
+
+
+def _bp_extractor(**kwargs):
+    """Accepted args url or html"""
+    return Extractor(extractor="DefaultExtractor", **kwargs)
+
+
+def _entry2html_fields(entry):
+    title = entry.get("title", "")
+    content = max(
+        [
+            entry.get("description", ""),
+            entry.get("content", [{}])[0].get("value", ""),
+            entry.get("summary", ""),
+        ],
+        key=len,
+    )
+    return title + "." + content
+
+
+def _get_doc_type(response):
+    return mimeparse.parse_mime_type(response.headers["Content-Type"])[1]
+
+
+def handler(ex, fun, default):
+    log.warning(str(fun) + " failed")
+    return default
+
+
+def _keep_longest(*strategies):
+
+    return max(_keep_all(*strategies), key=len)
+
+
+def _keep_all(*strategies):
+
+    return map(
+        lambda fun: excepts(Exception, fun, partial(handler, fun=fun, default=""))(),
+        strategies,
+    )
+
+
+def _keep_first(*strategies):
+    for fun in strategies:
+        retval = excepts(Exception, fun, partial(handler, fun=fun, default=None))()
+        if retval is not None:
+            return retval
+        else:
+            log.warning(str(fun) + " failed")
+        raise FailedExtraction()
 
 
 def _is_twitter(url):
-    return bool(re.search(r'twitter.com', url))  # quick and dirty
+    return bool(re.search(r"twitter.com", url))  # quick and dirty
+
+
+def _get_first_non_twitter_url(text):
+    return [url for url in URLExtract().find_urls(text) if not _is_twitter(url)][0]
+
+
+def _warn_short(text):
+    if len(text) < 40:
+        log.warning("Minimal text extracted")
+    return text
 
 
 class FailedExtraction(Exception):
     pass
-
-
-# see
-# http://tomazkovacic.com/blog/2011/06/09/evaluating-text-extraction-algorithms/
-def _scrape_html(html):
-    try:
-        return Extractor(extractor='DefaultExtractor', html=html)
-    except Exception as e:
-        log.warn("Can't extract from" +
-                 " {html} with boilerpipe because of exception {e}".format(
-                     html=html[:800], e=e))
-        raise FailedExtraction
-
-
-def _scrape_url(url):
-    try:
-        return Extractor(extractor='DefaultExtractor', url=url)
-    except Exception as e:
-        log.warn("Can't extract from" +
-                 " {url} with boilerpipe because of exception {e}".format(
-                     url=url, e=e))
-        raise
-
-
-def _scrape2text(url):
-    response = requests.get(url)
-    doc_type = mimeparse.parse_mime_type(response.headers['Content-Type'])[1]
-    with tempfile.NamedTemporaryFile(mode="wb", suffix="." + doc_type) as fh:
-        fh.write(response.content)
-        fh.flush()
-
-        def fail():
-            raise FailedExtraction
-
-        return {
-            'html': lambda: _scrape_html(response.content).getText(),
-            'gif': fail,
-            'jpg': fail,
-            'png': fail
-        }.get(doc_type, lambda: unicode(textract.process(fh.name)))()
-
-
-def entry2url(entry):
-    url = entry.link
-    if _is_twitter(url):
-        try:
-            url = _get_first_non_twitter_url(_get_entry_content(entry))
-        except IndexError:
-            pass
-        except Exception as e:
-            log.warn((u"Can't get external link from {url} " +
-                      "because of exception {e}").format(url=url, e=e))
-    return url
-
-
-def entry2html(entry):
-    url = entry2url(entry)
-    return _url2html(None, entry) if _is_twitter(url) else _url2html(
-        url, entry)
-
-
-def entry2text(entry):
-    url = entry2url(entry)
-    return _url2text(None, entry) if _is_twitter(url) else _url2text(
-        url, entry)
-
-
-def _url2html(url, entry=None):
-    html = None
-    if url is not None:
-        try:
-            html = _scrape_url(url).getHTML()
-        except Exception as e:
-            log.warn(u"{url} can't be scraped because of exception {e}".format(
-                url=url, e=e))
-    if html is None and entry is not None:
-        html = u'<h1>{title}</h1>\n'.format(
-            title=entry.title) + _get_entry_content(entry)
-    if not html:
-        log.error("Could not extract any html for for {url} or {link}".format(
-            url=url, link=getattr(entry, "link")))
-        raise FailedExtraction
-    return html
-
-
-def _check_short(text):
-    if len(text) < 40:
-        raise FailedExtraction
-
-
-def _url2text(url, entry=None):
-    try:  # scrape url with boilerpipe
-        text = _scrape_url(url).getText()
-        _check_short(text)
-    except Exception:
-        try:  # scrape with textract
-            text = _scrape2text(url)
-            _check_short(text)
-        except Exception:
-            try:  # scrape entry content
-                entry_content = _scrape_html(
-                    _get_entry_content(entry)).getText()
-            except Exception:
-                entry_content = ''
-            text = (entry.title or '') + "." + (entry_content or '')
-    if not text:
-        log.error("Could not extract any text for {url}".format(url=url))
-        raise FailedExtraction
-    return text

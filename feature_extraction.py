@@ -1,4 +1,4 @@
-from content_extraction import entry2text
+from content_extraction import get_text
 from InferSent.encoder import models as im
 from joblib import Memory
 from nltk.data import load as nltk_load
@@ -35,12 +35,9 @@ _memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10 ** 9)
 _memory.reduce_size()
 
 
-@_memory.cache(ignore=["entry"])
+# @_memory.cache(ignore=["entry"])
 def entry2mat(entry, url):
-    # first time call for a given entry requires only non None entry
-    # additional calls may specify only url and go straight to cache
-    assert entry is not None
-    return _text2mat(entry2text(entry))
+    return _text2mat(get_text(entry=entry, url=url))
 
 
 def url2mat(url):
