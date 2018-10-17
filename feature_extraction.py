@@ -35,7 +35,7 @@ _memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10 ** 9)
 _memory.reduce_size()
 
 
-# @_memory.cache(ignore=["entry"])
+@_memory.cache(ignore=["entry"])
 def entry2mat(entry, url):
     return _text2mat(get_text(entry=entry, url=url))
 
