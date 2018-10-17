@@ -18,10 +18,10 @@ def _get_shove_db(path):
         A dict-like object backed by the db at path, attached to flask context.
 
     """
-    attr_name = '_' + basename(path)
+    attr_name = "_" + basename(path)
     db = getattr(g, attr_name, None)
     if db is None:
-        db = shove.Shove('lite://' + path)
+        db = shove.Shove("lite://" + path)
         setattr(g, attr_name, db)
     return db
 
@@ -29,17 +29,21 @@ def _get_shove_db(path):
 def feed_db():
     """Access feed db.
 
+    This is just a cache for feed processing, only for performance and to be nice on the web servers.
+
     Returns
     -------
     Shove object
         A Shove object with feed urls as keys and feed content as values.
 
     """
-    return _get_shove_db('feed.sqlite')
+    return _get_shove_db("feed.sqlite")
 
 
 def training_db():
-    """Access for training db.
+    """Access training db.
+
+    This has the user feedback as (url, feedback) pairs.
 
     Returns
     -------
@@ -47,11 +51,13 @@ def training_db():
         Shove object with urls as keys and feedback info as values.
 
     """
-    return _get_shove_db('training.sqlite')
+    return _get_shove_db("training.sqlite")
 
 
 def model_db():
     """Access for model db.
+
+    This stores the learning model.
 
     Returns
     -------
@@ -59,4 +65,4 @@ def model_db():
         Shove object with a single key and value a sklearn model.
 
     """
-    return _get_shove_db('model.sqlite')
+    return _get_shove_db("model.sqlite")
