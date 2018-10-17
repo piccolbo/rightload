@@ -5,13 +5,14 @@ the other through its link. Also in the implementation different libs are applie
 
 
 """
-
+import BeautifulSoup as BS
 from boilerpipe.extract import Extractor
-from inspect import getsource
 import logging as log
 import mimeparse
 import re
+from rl_logging import fun_name
 import requests
+from string import printable
 import tempfile
 import textract
 from toolz.functoolz import excepts, partial
@@ -54,12 +55,7 @@ def get_url(entry):
 
 
 def _entry2url_twitter(entry):
-    url = entry.link
-    try:
-        url = _get_first_non_twitter_url(_entry2html_fields(entry))
-    except IndexError:
-        pass
-    return url
+    return _get_first_usable_url(_entry2html_fields(entry)) or entry.link
 
 
 def _url2content(url, check_html=False):
@@ -87,7 +83,11 @@ def _url2text(url):
 
 
 def _html2text(html):
-    return _html2text_bp(html)
+    return _keep_longest(
+        lambda: _html2text_bp(html),
+        lambda: _html2text_bs(html),
+        lambda: _html2text_re(html),
+    )
 
 
 def _url2text_bp(url):
@@ -100,6 +100,14 @@ def _url2html_bp(url):
 
 def _html2text_bp(html):
     return _bp_extractor(html=html).getText()
+
+
+def _html2text_bs(html):
+    return BS.BeautifulSoup(html).getText()
+
+
+def _html2text_re(html):
+    return " ".join(re.split(pattern="<.*?>", string=html))
 
 
 def _content2text_te(content):
@@ -133,7 +141,7 @@ def _get_doc_type(response):
 
 
 def handler(ex, fun, default):
-    log.warning(str(fun) + " failed")
+    log.warning(fun_name(fun) + " failed")
     return default
 
 
@@ -156,9 +164,7 @@ def _keep_first(*strategies):
         if retval is not None:
             return retval
         else:
-            log.warning(
-                getsource(fun) if fun.func_name == "<lambda>" else str(fun) + " failed"
-            )
+            log.warning(fun_name(fun) + " failed")
         raise FailedExtraction()
 
 
@@ -166,8 +172,17 @@ def _is_twitter(url):
     return bool(re.search(r"twitter.com", url))  # quick and dirty
 
 
-def _get_first_non_twitter_url(text):
-    return [url for url in URLExtract().find_urls(text) if not _is_twitter(url)][0]
+def _is_image(url):
+    return url.split("/")[-1].split(".")[-1] in set(["jpg", "jpeg", "png"])
+
+
+def _get_first_usable_url(text):
+    s = [
+        url
+        for url in URLExtract().find_urls(text)
+        if not _is_twitter(url) and not _is_image(url)
+    ]
+    return filter(lambda x: x in set(printable), s[0]) if len(s) > 0 else None
 
 
 def _warn_short(text):
