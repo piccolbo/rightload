@@ -2,6 +2,7 @@ from types import FunctionType
 from functools import wraps
 import logging as log
 from inspect import getcallargs
+from inspect import getsource
 
 
 def decorate_all_in_module(module, decorator):
@@ -25,3 +26,24 @@ def log_decorator(fun):
         return retval
 
     return wrapper
+
+
+def log_on_fail(fun):
+    @wraps(fun)
+    def wrapper(*args, **kwargs):
+        try:
+            retval = fun(*args, **kwargs)
+        except Exception as e:
+            log.warning(
+                "{fun} failed with exception {e} on arguments {args}, {kwargs}".format(
+                    fun=fun_name(fun), args=args, kwargs=kwargs, e=e
+                )
+            )
+            raise
+        return retval
+
+    return wrapper
+
+
+def fun_name(fun):
+    return getsource(fun) if fun.func_name == "<lambda>" else str(fun) + " failed"
