@@ -9,6 +9,13 @@ import sys
 import trace
 import logging as log
 
+#
+# from decorate_module import decorate_all_in_module, log_decorator
+# import content_extraction as ce
+#
+# decorate_all_in_module(ce, log_decorator)
+
+
 # should be set at the project level
 log.basicConfig(filename="./log", level=log.INFO)
 
