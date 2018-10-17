@@ -7,6 +7,7 @@ the other through its link. Also in the implementation different libs are applie
 """
 
 from boilerpipe.extract import Extractor
+from inspect import getsource
 import logging as log
 import mimeparse
 import re
@@ -155,7 +156,9 @@ def _keep_first(*strategies):
         if retval is not None:
             return retval
         else:
-            log.warning(str(fun) + " failed")
+            log.warning(
+                getsource(fun) if fun.func_name == "<lambda>" else str(fun) + " failed"
+            )
         raise FailedExtraction()
 
 
