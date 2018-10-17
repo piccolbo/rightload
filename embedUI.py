@@ -1,12 +1,18 @@
 """Insert feedback UI in feed entry."""
+
 import BeautifulSoup as bs
-from content_extraction import get_text, get_url
 from colour import Color
+from content_extraction import get_text, get_url
+import cPickle
+from ml import _get_model
 from feature_extraction import text2sentences
 from flask import request
+import fnmatch
 from fuzzywuzzy import fuzz
+from hashlib import sha256
 import logging as log
 import numpy as np
+import os
 from traceback import format_exc
 
 
@@ -63,7 +69,11 @@ def _conditional_bar(mean_score, content_link):
         style=u"BACKGROUND-COLOR: #DBDBDB",
         text=(_feedback_link(True, content_link) if mean_score <= 0.5 else u"")
         + (u" or " if mean_score == 0.5 else u"")
-        + (_feedback_link(False, content_link) if mean_score >= 0.5 else u""),
+        + (_feedback_link(False, content_link) if mean_score >= 0.5 else u"")
+        + " "
+        + src_hash()
+        + " "
+        + model_hash(),
     )
 
 
@@ -122,12 +132,7 @@ def _score2color(score):
 def _highlight_text(text, score):
     try:
         sentences = text2sentences(text)
-        return u"".join(
-            [
-                _highlight_sentence(x, s)
-                for x, s in map(lambda a, x: (a, x or 0), sentences, score)
-            ]
-        )
+        return u"".join([_highlight_sentence(x, s) for x, s in zip(sentences, score)])
     except Exception:
         log.error(format_exc())
         return text
@@ -155,3 +160,18 @@ def _highlight_html(html, text, score):
             )
         )
     return unicode(soup)
+
+
+def src_hash():
+    data = ""
+    srcdir = os.path.dirname(__file__) or "."
+    for file in os.listdir(srcdir):
+        if fnmatch.fnmatchcase(file, "*.py"):
+            with open(srcdir + "/" + file, "r") as fh:
+                data += fh.read()
+    return sha256(data).hexdigest()[:10]
+
+
+def model_hash():
+    model = _get_model()
+    return sha256(cPickle.dumps(model)).hexdigest()[:10]
