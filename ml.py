@@ -7,9 +7,10 @@ import gc
 import logging as log
 import numpy as np
 
-import sklearn.ensemble as sken
+# import sklearn.ensemble as sken
 
-#  from sklearn import linear_model as lm
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import cross_val_score
 
 _model_attr_name = "_model"
 
@@ -25,10 +26,10 @@ def _get_model():
 
 
 def _new_model():
-    # return lm.LogisticRegressionCV(solver="sag", verbose=1, n_jobs=-1)
-    return sken.RandomForestClassifier(
-        n_estimators=100, oob_score=True, max_features=300, n_jobs=-1
-    )
+    return LogisticRegressionCV(solver="sag", verbose=0, n_jobs=-1, cv=10)
+    # return sken.RandomForestClassifier(
+    #     n_estimators=1000, oob_score=True, max_features=1, n_jobs=-1
+    # )
 
 
 def _score_entry(entry):
@@ -123,7 +124,10 @@ def learn():
     log.info("Matrix size:" + str(X.shape))
     model.fit(X=X, y=y)
     _set_model(model)
-    msg = "Classifier Score: {score}".format(score=model.score(X=X, y=y))
-    log.info(msg)
+    log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
     # log.info(model.oob_score_) # this is for RF
-    return msg
+    log.info(
+        "Cross Validation Score: {score}".format(
+            score=cross_val_score(model, X, y, cv=10, scoring="accuracy")
+        )
+    )
