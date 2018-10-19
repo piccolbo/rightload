@@ -1,12 +1,18 @@
 """
-General organization of content extraction. Starting from an entry,
-there are two avenues to get text out, one through the entry itself,
-the other through its link. Also in the implementation different libs are applied, for now boilerpipe and textract, complicating the picture
+General organization of content extraction.
 
+we have datatypes like entry url content html and text
+we have extractors between these types, some of which are not really extractors but we'll stick with that name
+when we have multiple approaches at a conversion we aggregate the result with keep_first
+in recognition of the fact that extractors can fail, they are in charge of catching own exceptions and returning ""
+
+when  multiple ways of getting
+logging is taken care of elsewhere, but all exceptions are logged
 
 """
 import BeautifulSoup as BS
 from boilerpipe.extract import Extractor
+from functools import wraps
 import logging as log
 import mimeparse
 import re
@@ -15,36 +21,79 @@ import requests
 from string import printable
 import tempfile
 import textract
-from toolz.functoolz import excepts, partial
+from toolz.functoolz import partial
 from urlextract import URLExtract
 
 
+# this defines a partially FailedExtraction, justifies using an alternate method
+# but not raising an exception
+SHORT_TEXT = 40
+
+
+def extractor(fun):
+    """An extractor doesn't fail, it logs instead and returns "".
+    """
+
+    @wraps(fun)
+    def decorated(*args, **kwargs):
+        try:
+            return _warn_short(fun(*args, **kwargs))
+        except Exception as e:
+            log.warning(
+                "{fun} failed with exception {e} on arguments {args}, {kwargs}".format(
+                    fun=fun_name(fun), args=args, kwargs=kwargs, e=e
+                )
+            )
+            return ""
+
+    return decorated
+
+
+@extractor
+def _keep_first(*strategies, **kwargs):
+    """Try strategies (argumentless callables) in order provided.
+
+    If extraction exceeds supplied min_length, return, else try next.
+    If all strategies have been attempted, return longest extraction."""
+
+    min_length = kwargs.get("min_length", SHORT_TEXT)
+    longest = ""
+    for fun in strategies:
+        retval = fun()
+        if retval is not None and len(retval) >= min_length:
+            return retval
+        if len(retval) > len(longest):
+            longest = retval
+    return _warn_short(longest, min_length)
+
+
+@extractor
 def get_html(url=None, entry=None):
     """
     Give me the content of the url or entry, to display in feed reader
     """
-    assert url is not None or entry is not None
-    return _url2html(url) if entry is None else _entry2html(entry)
+    url, entry = _process_get_args(url, entry)
+    # prefer url access as it goes to real content. Feed entry is often abridged.
+    return _keep_first(lambda: _url2html(url), lambda: _entry2html(entry))
 
 
+@extractor
 def get_text(url=None, entry=None):
     """
     Give me text associated with url or entry, for display or ML use
     """
+    url, entry = _process_get_args(url, entry)
+    return _keep_first(lambda: _url2text(url), lambda: _entry2text(entry))
+
+
+def _process_get_args(url, entry):
+    assert url is not None or entry is not None
     if url is None:
         url = get_url(entry)
-    return _warn_short(
-        _keep_longest(
-            lambda: _url2text(url),
-            lambda: _entry2text(entry) if entry is not None else "",
-        )
-    )
+    return url, entry
 
 
-def _entry2html(entry):
-    return _entry2html_fields(entry)
-
-
+@extractor
 def _entry2text(entry):
     return _html2text(_entry2html(entry))
 
@@ -55,9 +104,11 @@ def get_url(entry):
 
 
 def _entry2url_twitter(entry):
-    return _get_first_usable_url(_entry2html_fields(entry)) or entry.link
+    return _get_first_usable_url(_entry2html(entry)) or entry.link
 
 
+# this needs a custom dec because of return type
+@extractor
 def _url2content(url, check_html=False):
     response = requests.get(url)
     doc_type = _get_doc_type(response)
@@ -70,46 +121,32 @@ def _url2content(url, check_html=False):
     return data, doc_type
 
 
+@extractor
 def _url2html(url):
-    return _keep_longest(
-        lambda: _url2content(url, check_html=True), lambda: _url2html_bp(url)
+    return _keep_first(
+        lambda: lambda: _bp_extractor(url=url).getHTML(),
+        _url2content(url, check_html=True),
     )
 
 
+@extractor
 def _url2text(url):
     return _keep_first(
-        lambda: _url2text_bp(url), lambda: _content2text_te(_url2content(url))
+        lambda: _bp_extractor(url=url).getText(),
+        lambda: _content2text_te(_url2content(url)),
     )
 
 
+@extractor
 def _html2text(html):
-    return _keep_longest(
-        lambda: _html2text_bp(html),
-        lambda: _html2text_bs(html),
-        lambda: _html2text_re(html),
+    return _keep_first(
+        lambda: _bp_extractor(html=html).getText(),
+        lambda: BS.BeautifulSoup(html).getText(),
+        lambda: " ".join(re.split(pattern="<.*?>", string=html)),
     )
 
 
-def _url2text_bp(url):
-    return _bp_extractor(url=url).getText()
-
-
-def _url2html_bp(url):
-    return _bp_extractor(url=url).getHTML()
-
-
-def _html2text_bp(html):
-    return _bp_extractor(html=html).getText()
-
-
-def _html2text_bs(html):
-    return BS.BeautifulSoup(html).getText()
-
-
-def _html2text_re(html):
-    return " ".join(re.split(pattern="<.*?>", string=html))
-
-
+@extractor
 def _content2text_te(content):
     data, doc_type = content
     with tempfile.NamedTemporaryFile(mode="wb", suffix="." + doc_type) as fh:
@@ -123,7 +160,8 @@ def _bp_extractor(**kwargs):
     return Extractor(extractor="DefaultExtractor", **kwargs)
 
 
-def _entry2html_fields(entry):
+@extractor
+def _entry2html(entry):
     title = entry.get("title", "")
     content = max(
         [
@@ -133,39 +171,12 @@ def _entry2html_fields(entry):
         ],
         key=len,
     )
+    # TODO: would it be possible to grab the title for use in other types of extraction?
     return title + "." + content
 
 
 def _get_doc_type(response):
     return mimeparse.parse_mime_type(response.headers["Content-Type"])[1]
-
-
-def handler(ex, fun, default):
-    log.warning(fun_name(fun) + " failed")
-    return default
-
-
-def _keep_longest(*strategies):
-
-    return max(_keep_all(*strategies), key=len)
-
-
-def _keep_all(*strategies):
-
-    return map(
-        lambda fun: excepts(Exception, fun, partial(handler, fun=fun, default=""))(),
-        strategies,
-    )
-
-
-def _keep_first(*strategies):
-    for fun in strategies:
-        retval = excepts(Exception, fun, partial(handler, fun=fun, default=None))()
-        if retval is not None:
-            return retval
-        else:
-            log.warning(fun_name(fun) + " failed")
-        raise FailedExtraction()
 
 
 def _is_twitter(url):
@@ -185,11 +196,7 @@ def _get_first_usable_url(text):
     return filter(lambda x: x in set(printable), s[0]) if len(s) > 0 else None
 
 
-def _warn_short(text):
-    if len(text) < 40:
+def _warn_short(text, min_length=SHORT_TEXT):
+    if len(text) < min_length:
         log.warning("Minimal text extracted")
     return text
-
-
-class FailedExtraction(Exception):
-    pass

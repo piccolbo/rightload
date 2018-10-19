@@ -28,18 +28,15 @@ def log_decorator(fun):
     return wrapper
 
 
-def log_on_fail(fun):
+def log_on_fail(fun, retval_check=lambda x: None):
     @wraps(fun)
     def wrapper(*args, **kwargs):
         try:
             retval = fun(*args, **kwargs)
         except Exception as e:
-            log.warning(
-                "{fun} failed with exception {e} on arguments {args}, {kwargs}".format(
-                    fun=fun_name(fun), args=args, kwargs=kwargs, e=e
-                )
-            )
+            log_call(fun, args, kwargs, exception=e)
             raise
+        retval_check(retval)
         return retval
 
     return wrapper
@@ -47,3 +44,11 @@ def log_on_fail(fun):
 
 def fun_name(fun):
     return getsource(fun) if fun.func_name == "<lambda>" else str(fun) + " failed"
+
+
+def log_call(fun, args, kwargs, exception):
+    log.warning(
+        "{fun} failed with exception {e} on arguments {args}, {kwargs}".format(
+            fun=fun_name(fun), args=args, kwargs=kwargs, e=exception
+        )
+    )

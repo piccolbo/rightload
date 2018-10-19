@@ -10,12 +10,13 @@ import sys
 import trace
 import logging as log
 
-from rl_logging import decorate_all_in_module, log_on_fail
-import content_extraction as ce
-
-
-decorate_all_in_module(ce, log_on_fail)
-
+#
+# from rl_logging import decorate_all_in_module, log_on_fail
+# import content_extraction as ce
+#
+#
+# decorate_all_in_module(ce, log_on_fail)
+#
 
 # should be set at the project level
 log.basicConfig(filename="./log", level=log.INFO)
