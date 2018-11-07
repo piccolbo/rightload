@@ -196,7 +196,10 @@ def _get_first_usable_url(text):
     return filter(lambda x: x in set(printable), s[0]) if len(s) > 0 else None
 
 
-def _warn_short(text, min_length=SHORT_TEXT):
-    if len(text) < min_length:
-        log.warning("Minimal text extracted")
+def _warn_short(what, min_length=SHORT_TEXT):
+    text = what if isinstance(what, basestring) else what[0]
+    # if len(text) < min_length:
+    # log.warning(
+    #     "".join(tb.format_stack()[-10:]) + "Minimal text extracted: " + text
+    # )
     return text
