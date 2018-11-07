@@ -56,10 +56,11 @@ def _keep_first(*strategies, **kwargs):
     longest = ""
     for fun in strategies:
         retval = fun()
-        if retval is not None and len(retval) >= min_length:
-            return retval
-        if len(retval) > len(longest):
-            longest = retval
+        payload = retval if isinstance(retval, basestring) else retval[0]
+        if payload is not None and len(payload) >= min_length:
+            return payload
+        if len(payload) > len(longest):
+            longest = payload
     return _warn_short(longest, min_length)
 
 
