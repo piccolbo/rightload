@@ -21,7 +21,7 @@ def _set_model(model):
     model_db().sync()
 
 
-def _get_model():
+def get_model():
     return getattr(g, _model_attr_name, None) or model_db().get("user")
 
 
@@ -36,7 +36,7 @@ def _score_entry(entry):
     url = get_url(entry)
     try:
         X = entry2mat(entry, url)
-        model = _get_model()
+        model = get_model()
         probs = model.predict_proba(X=X)
         return probs[:, 1]
     except Exception as e:
