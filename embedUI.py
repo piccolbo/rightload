@@ -132,15 +132,18 @@ def _score2color(score):
 def _highlight_text(text, score):
     try:
         sentences = text2sentences(text)
-        return u"".join([_highlight_sentence(x, s) for x, s in zip(sentences, score)])
+        rank = (rankdata(score) - 1) / (len(score) - 1.0) if len(score) > 1 else [0.5]
+        return u"".join(
+            [_highlight_sentence(x, s, r) for x, s, r in zip(sentences, score, rank)]
+        )
     except Exception:
         log.error(format_exc())
         return text
 
 
-def _highlight_sentence(sentence, score):
+def _highlight_sentence(sentence, score, rank):
     return _span(
-        u"<sup>{s:.2f}</sup> {x}".format(x=sentence, s=score), _score2color(score)
+        u"<sup>{s:.2f}</sup> {x}".format(x=sentence, s=score), _score2color(rank)
     )
 
 
