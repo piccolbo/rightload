@@ -3,6 +3,7 @@ from functools import wraps
 import logging as log
 from inspect import getcallargs
 from inspect import getsource
+import traceback as tb
 
 
 def decorate_all_in_module(module, decorator):
@@ -43,12 +44,16 @@ def log_on_fail(fun, retval_check=lambda x: None):
 
 
 def fun_name(fun):
-    return getsource(fun) if fun.func_name == "<lambda>" else str(fun) + " failed"
+    return getsource(fun) if fun.func_name == "<lambda>" else str(fun)
 
 
 def log_call(fun, args, kwargs, exception):
     log.warning(
+        #    tb.format_exc() +
         "{fun} failed with exception {e} on arguments {args}, {kwargs}".format(
-            fun=fun_name(fun), args=args, kwargs=kwargs, e=exception
+            fun=fun_name(fun),
+            args=map(lambda x: str(x)[:100], args),
+            kwargs={k: str(v)[:100] for k, v in kwargs.items()},
+            e=exception,
         )
     )
