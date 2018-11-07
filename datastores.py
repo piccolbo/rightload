@@ -1,6 +1,6 @@
 """Data persistence layer for rightload."""
 from flask import g
-from os.path import basename
+from os.path import basename, getmtime
 import shove
 
 
@@ -24,6 +24,12 @@ def _get_shove_db(path):
         db = shove.Shove("lite://" + path)
         setattr(g, attr_name, db)
     return db
+
+
+def get_model_db_unix_time():
+    # using private API, fix
+    fname = model_db()._store._engine
+    return getmtime(fname)
 
 
 def feed_db():
