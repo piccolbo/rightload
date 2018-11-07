@@ -166,7 +166,6 @@ def _highlight_html(html, text, score):
 
 
 def src_date():
-    data = ""
     srcdir = dirname(__file__) or "."
     return dt.datetime.fromtimestamp(
         max(getmtime(srcdir + "/" + file) for file in listdir(srcdir))

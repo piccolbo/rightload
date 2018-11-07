@@ -146,6 +146,7 @@ def _html2text(html):
 @extractor
 def _content2text_te(content):
     data, doc_type = content
+    data = data.encode("utf-8")
     with tempfile.NamedTemporaryFile(mode="wb", suffix="." + doc_type) as fh:
         fh.write(data)
         fh.flush()
