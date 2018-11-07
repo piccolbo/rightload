@@ -13,7 +13,6 @@ logging is taken care of elsewhere, but all exceptions are logged
 import BeautifulSoup as BS
 from boilerpipe.extract import Extractor
 from functools import wraps
-import logging as log
 import mimeparse
 import re
 from rl_logging import log_call
@@ -21,7 +20,6 @@ import requests
 from string import printable
 import tempfile
 import textract
-from toolz.functoolz import partial
 from urlextract import URLExtract
 
 
