@@ -16,7 +16,7 @@ from functools import wraps
 import logging as log
 import mimeparse
 import re
-from rl_logging import fun_name
+from rl_logging import log_call
 import requests
 from string import printable
 import tempfile
@@ -39,11 +39,7 @@ def extractor(fun):
         try:
             return _warn_short(fun(*args, **kwargs))
         except Exception as e:
-            log.warning(
-                "{fun} failed with exception {e} on arguments {args}, {kwargs}".format(
-                    fun=fun_name(fun), args=args, kwargs=kwargs, e=e
-                )
-            )
+            log_call(fun, args, kwargs, exception=e)
             return ""
 
     return decorated
