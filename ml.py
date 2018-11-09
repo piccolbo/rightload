@@ -27,7 +27,7 @@ def get_model():
 
 def _new_model():
     return LogisticRegressionCV(
-        solver="sag", scoring="log_loss", verbose=0, n_jobs=-1, cv=10
+        solver="sag", scoring="neg_log_loss", verbose=0, n_jobs=-1, cv=10
     )
     # return sken.RandomForestClassifier(
     #     n_estimators=1000, oob_score=True, max_features=1, n_jobs=-1
@@ -130,6 +130,6 @@ def learn():
     # log.info(model.oob_score_) # this is for RF
     log.info(
         "Cross Validation Score: {score}".format(
-            score=cross_val_score(model, X, y, cv=10, scoring="log_loss")
+            score=cross_val_score(model, X, y, cv=10, scoring="neg_log_loss")
         )
     )
