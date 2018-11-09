@@ -198,4 +198,4 @@ def _warn_short(what, min_length=SHORT_TEXT):
     # log.warning(
     #     "".join(tb.format_stack()[-10:]) + "Minimal text extracted: " + text
     # )
-    return text
+    return what
