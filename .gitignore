@@ -10,3 +10,5 @@ python-boilerpipe/
 score-cache/*
 log
 *.log
+feature-cache-basilica/*
+feature-cache-infersent/*
