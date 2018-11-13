@@ -7,7 +7,7 @@ from numpy import array
 _sent_detector = nltk_load("tokenizers/punkt/english.pickle")
 
 
-_memory = Memory(cachedir="feature-cache", verbose=1, bytes_limit=10 ** 9)
+_memory = Memory(cachedir="feature-cache-basilica", verbose=1, bytes_limit=10 ** 9)
 _memory.reduce_size()
 
 
