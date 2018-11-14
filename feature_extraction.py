@@ -29,7 +29,7 @@ def _text2mat(text):
     if len(sentences) == 0:
         raise FailedExtraction
 
-    bkey = "9ec4c2f3-d8de-bd48-08e2-733dfd25fb6e"
+    bkey = ""  # your basilica key here
 
     if sentences:
         with Connection(bkey) as conn:
