@@ -31,7 +31,7 @@ _infersent.load_state_dict(
 _infersent.set_glove_path("InferSent/dataset/GloVe/glove.840B.300d.txt")
 _infersent.build_vocab_k_words(K=1)
 
-_memory = Memory(cachedir="feature-cache-basilica", verbose=1, bytes_limit=10 ** 9)
+_memory = Memory(cachedir="feature-cache-infersent", verbose=1, bytes_limit=10 ** 9)
 _memory.reduce_size()
 
 
