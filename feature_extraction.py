@@ -3,6 +3,7 @@ from basilica import Connection
 from joblib import Memory
 from nltk.data import load as nltk_load
 from numpy import array
+from os import environ
 
 _sent_detector = nltk_load("tokenizers/punkt/english.pickle")
 
@@ -29,7 +30,8 @@ def _text2mat(text):
     if len(sentences) == 0:
         raise FailedExtraction
 
-    bkey = ""  # your basilica key here
+    bkey = environ["BASILICA_KEY"]
+    assert bkey
 
     if sentences:
         with Connection(bkey) as conn:
