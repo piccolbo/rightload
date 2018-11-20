@@ -127,9 +127,8 @@ def learn():
     model.fit(X=X, y=y)
     _set_model(model)
     log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
-    # log.info(model.oob_score_) # this is for RF
-    # log.info(
-    #     "Cross Validation Score: {score}".format(
-    #         score=cross_val_score(model, X, y, cv=10, scoring="neg_log_loss")
-    #     )
-    # )
+    log.info(
+        "Cross Validation Score: {score}".format(
+            score=cross_val_score(model, X, y, cv=10, scoring="neg_log_loss")
+        )
+    )
