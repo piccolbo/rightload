@@ -129,6 +129,6 @@ def learn():
     log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
     log.info(
         "Cross Validation Score: {score}".format(
-            score=cross_val_score(model, X, y, cv=10, scoring="neg_log_loss")
+            score=cross_val_score(model, X, y, cv=10, scoring="neg_log_loss", n_jobs=-1)
         )
     )
