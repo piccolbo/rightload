@@ -139,7 +139,7 @@ def _url2text(url):
 def _html2text(html):
     retval = _keep_first(
         lambda: _bp_extractor(html=html).getText(),
-        lambda: BS.BeautifulSoup(html).getText(),
+        lambda: BS.BeautifulSoup(html, "lxml").getText(),
         lambda: " ".join(re.split(pattern="<.*?>", string=html)),
     )
     assert isinstance(retval, str)
