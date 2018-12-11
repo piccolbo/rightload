@@ -43,14 +43,14 @@ def log_on_fail(fun, retval_check=lambda x: None):
 
 
 def fun_name(fun):
-    return getsource(fun) if fun.func_name == "<lambda>" else str(fun)
+    return getsource(fun) if fun.__name__ == "<lambda>" else str(fun)
 
 
 def log_call(fun, args, kwargs, exception):
     log.warning(
         "{fun} failed with exception {e} on arguments {args}, {kwargs}".format(
             fun=fun_name(fun),
-            args=map(lambda x: str(x)[:100], args),
+            args=list(map(lambda x: str(x)[:100], args)),
             kwargs={k: str(v)[:100] for k, v in kwargs.items()},
             e=exception,
         )

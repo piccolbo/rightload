@@ -10,7 +10,7 @@ when  multiple ways of getting
 logging is taken care of elsewhere, but all exceptions are logged
 
 """
-import BeautifulSoup as BS
+import bs4 as BS
 from boilerpipe.extract import Extractor
 from functools import wraps
 import mimeparse
@@ -29,7 +29,7 @@ SHORT_TEXT = 40
 
 
 def extractor(fun):
-    """An extractor doesn't fail, it logs instead and returns "".
+    """An extractor doesn't fail, it logs instead and returns an empty string.
     """
 
     @wraps(fun)
@@ -38,6 +38,7 @@ def extractor(fun):
             return _warn_short(fun(*args, **kwargs))
         except Exception as e:
             log_call(fun, args, kwargs, exception=e)
+            raise
             return ""
 
     return decorated
@@ -54,7 +55,7 @@ def _keep_first(*strategies, **kwargs):
     longest = ""
     for fun in strategies:
         retval = fun()
-        payload = retval if isinstance(retval, basestring) else retval[0]
+        payload = retval if isinstance(retval, (str, bytes)) else retval[0]
         if payload is not None and len(payload) >= min_length:
             return payload
         if len(payload) > len(longest):
@@ -107,17 +108,18 @@ def _entry2url_twitter(entry):
 def _url2content(url, check_html=False):
     response = requests.get(url)
     doc_type = _get_doc_type(response)
+    encoding = response.encoding
     assert (not check_html) or (doc_type == "html")
-    data = (
-        unicode(response.content, encoding=response.encoding)
-        if response.encoding is not None
-        else response.content
-    )
-    return data, doc_type
+    content = response.content.decode(encoding) if check_html else response.content
+    return content, doc_type
 
 
 @extractor
 def _url2html(url):
+    def to_html(content):
+        content, doc_type, encoding = content
+        return content.decode(encoding)
+
     return _keep_first(
         lambda: lambda: _bp_extractor(url=url).getHTML(),
         _url2content(url, check_html=True),
@@ -126,29 +128,32 @@ def _url2html(url):
 
 @extractor
 def _url2text(url):
-    return _keep_first(
+    retval = _keep_first(
         lambda: _bp_extractor(url=url).getText(),
         lambda: _content2text_te(_url2content(url)),
     )
+    assert isinstance(retval, str)
+    return retval
 
 
 @extractor
 def _html2text(html):
-    return _keep_first(
+    retval = _keep_first(
         lambda: _bp_extractor(html=html).getText(),
         lambda: BS.BeautifulSoup(html).getText(),
         lambda: " ".join(re.split(pattern="<.*?>", string=html)),
     )
+    assert isinstance(retval, str)
+    return retval
 
 
 @extractor
 def _content2text_te(content):
     data, doc_type = content
-    data = data.encode("utf-8")
     with tempfile.NamedTemporaryFile(mode="wb", suffix="." + doc_type) as fh:
         fh.write(data)
         fh.flush()
-        return unicode(textract.process(fh.name, encoding="utf-8"), encoding="utf-8")
+        return textract.process(fh.name, encoding="utf-8").decode("utf-8")
 
 
 def _bp_extractor(**kwargs):
@@ -189,11 +194,11 @@ def _get_first_usable_url(text):
         for url in URLExtract().find_urls(text)
         if not _is_twitter(url) and not _is_image(url)
     ]
-    return filter(lambda x: x in set(printable), s[0]) if len(s) > 0 else None
+    return "".join(filter(lambda x: x in set(printable), s[0])) if len(s) > 0 else None
 
 
 def _warn_short(what, min_length=SHORT_TEXT):
-    text = what if isinstance(what, basestring) else what[0]
+    # text = what if isinstance(what, str) else what[0]
     # if len(text) < min_length:
     # log.warning(
     #     "".join(tb.format_stack()[-10:]) + "Minimal text extracted: " + text

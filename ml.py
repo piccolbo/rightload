@@ -111,7 +111,7 @@ def learn():
     Xy = [
         dict(X=X, y=[int(like)] * X.shape[0])
         for X, like in [
-            (_url2mat_or_None(url), like) for url, like in training_db().iteritems()
+            (_url2mat_or_None(url), like) for url, like in training_db().items()
         ]
         if (X is not None)
     ]

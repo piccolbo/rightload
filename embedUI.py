@@ -1,6 +1,6 @@
 """Insert feedback UI in feed entry."""
 
-import BeautifulSoup as bs
+import bs4 as bs
 from colour import Color
 from content_extraction import get_text, get_url
 from feature_extraction import text2sentences
@@ -154,4 +154,4 @@ def _highlight_html(html, text, score):
                 _highlight_sentence(x, _best_match_score(x, sentences, score))
             )
         )
-    return unicode(soup)
+    return soup
