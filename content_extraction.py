@@ -38,7 +38,6 @@ def extractor(fun):
             return _warn_short(fun(*args, **kwargs))
         except Exception as e:
             log_call(fun, args, kwargs, exception=e)
-            raise
             return ""
 
     return decorated
