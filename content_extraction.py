@@ -157,7 +157,7 @@ def _content2text_te(content):
 
 def _bp_extractor(**kwargs):
     """Accepted args url or html"""
-    return Extractor(extractor="DefaultExtractor", **kwargs)
+    return Extractor(extractor="ArticleExtractor", **kwargs)
 
 
 @extractor
