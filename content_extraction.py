@@ -53,7 +53,7 @@ def _keep_first(*strategies, **kwargs):
     min_length = kwargs.get("min_length", SHORT_TEXT)
     longest = ""
     for fun in strategies:
-        retval = fun()
+        retval = extractor(fun)()
         payload = retval if isinstance(retval, (str, bytes)) else retval[0]
         if payload is not None and len(payload) >= min_length:
             return payload
