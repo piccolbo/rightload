@@ -27,7 +27,7 @@ def get_model():
 
 def _new_model():
     return LogisticRegressionCV(
-        solver="sag", scoring="neg_log_loss", verbose=0, n_jobs=-1, cv=10
+        solver="sag", scoring="accuracy", verbose=0, n_jobs=1, cv=10
     )
     # return sken.RandomForestClassifier(
     #     n_estimators=1000, oob_score=True, max_features=1, n_jobs=-1
@@ -111,7 +111,7 @@ def learn():
     Xy = [
         dict(X=X, y=[int(like)] * X.shape[0])
         for X, like in [
-            (_url2mat_or_None(url), like) for url, like in training_db().iteritems()
+            (_url2mat_or_None(url), like) for url, like in training_db().items()
         ]
         if (X is not None)
     ]
@@ -127,9 +127,10 @@ def learn():
     model.fit(X=X, y=y)
     _set_model(model)
     log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
-    # log.info(model.oob_score_) # this is for RF
-    # log.info(
-    #     "Cross Validation Score: {score}".format(
-    #         score=cross_val_score(model, X, y, cv=10, scoring="neg_log_loss")
-    #     )
-    # )
+    log.info(
+        "Cross Validation Score: {score}".format(
+            score=sorted(
+                cross_val_score(model, X, y, cv=10, scoring="accuracy", n_jobs=-1)
+            )
+        )
+    )

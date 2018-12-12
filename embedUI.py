@@ -1,17 +1,13 @@
 """Insert feedback UI in feed entry."""
 
-import BeautifulSoup as bs
+import bs4 as bs
 from colour import Color
 from content_extraction import get_text, get_url
-from datastores import get_model_db_unix_time
-import datetime as dt
 from feature_extraction import text2sentences
 from flask import request
 from fuzzywuzzy import fuzz
 import logging as log
 import numpy as np
-from os import listdir
-from os.path import getmtime, dirname
 from scipy.stats import rankdata
 from traceback import format_exc
 
@@ -69,11 +65,7 @@ def _conditional_bar(mean_score, content_link):
         style=u"BACKGROUND-COLOR: #DBDBDB",
         text=(_feedback_link(True, content_link) if mean_score <= 0.5 else u"")
         + (u" or " if mean_score == 0.5 else u"")
-        + (_feedback_link(False, content_link) if mean_score >= 0.5 else u"")
-        + " "
-        + src_date()
-        + " "
-        + model_date(),
+        + (_feedback_link(False, content_link) if mean_score >= 0.5 else u""),
     )
 
 
@@ -162,17 +154,4 @@ def _highlight_html(html, text, score):
                 _highlight_sentence(x, _best_match_score(x, sentences, score))
             )
         )
-    return unicode(soup)
-
-
-def src_date():
-    srcdir = dirname(__file__) or "."
-    return dt.datetime.fromtimestamp(
-        max(getmtime(srcdir + "/" + file) for file in listdir(srcdir))
-    ).strftime("%Y-%m-%d %H:%M:%S")
-
-
-def model_date():
-    return dt.datetime.fromtimestamp(get_model_db_unix_time()).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+    return soup
