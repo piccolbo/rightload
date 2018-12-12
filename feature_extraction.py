@@ -31,7 +31,9 @@ def _text2mat(text):
         raise FailedExtraction
 
     bkey = environ["BASILICA_KEY"]
-    assert bkey
+    assert (
+        bkey
+    ), "Set the environment variable BASILICA_KEY to a key obtained from basilica.ai"
 
     if sentences:
         with Connection(bkey) as conn:
