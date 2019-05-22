@@ -1,12 +1,11 @@
 basilica>=0.2.4
-boilerpipe3>=1.1
-beautifulsoup4>=4.5.3
 colour>=0.1.5
 feedcache>=1.4.2
 feedgenerator>=1.9
 Flask>=1.0.2
 fuzzywuzzy>=0.17.0
 joblib>=0.11
+justext>=2.2.0    
 nltk>=3.3
 numpy>=1.15.3
 python-mimeparse>=1.6.0

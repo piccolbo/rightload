@@ -10,9 +10,8 @@ when  multiple ways of getting
 logging is taken care of elsewhere, but all exceptions are logged
 
 """
-import bs4 as BS
-from boilerpipe.extract import Extractor
 from functools import wraps
+from justext import justext, get_stoplist
 import mimeparse
 import re
 from rl_logging import log_call
@@ -49,7 +48,7 @@ def _keep_first(*strategies, **kwargs):
 
     If extraction exceeds supplied min_length, return, else try next.
     If all strategies have been attempted, return longest extraction."""
-
+    assert len(strategies) > 1
     min_length = kwargs.get("min_length", SHORT_TEXT)
     longest = ""
     for fun in strategies:
@@ -63,7 +62,7 @@ def _keep_first(*strategies, **kwargs):
 
 
 @extractor
-def get_html(url=None, entry=None):
+def get_html(*, url=None, entry=None):
     """
     Give me the content of the url or entry, to display in feed reader
     """
@@ -73,7 +72,7 @@ def get_html(url=None, entry=None):
 
 
 @extractor
-def get_text(url=None, entry=None):
+def get_text(*, url=None, entry=None):
     """
     Give me text associated with url or entry, for display or ML use
     """
@@ -115,35 +114,30 @@ def _url2content(url, check_html=False):
 
 @extractor
 def _url2html(url):
-    def to_html(content):
-        content, doc_type, encoding = content
-        return content.decode(encoding)
-
-    return _keep_first(
-        lambda: lambda: _bp_extractor(url=url).getHTML(),
-        _url2content(url, check_html=True),
-    )
+    return _url2content(url, check_html=True)
 
 
 @extractor
 def _url2text(url):
     retval = _keep_first(
-        lambda: _bp_extractor(url=url).getText(),
-        lambda: _content2text_te(_url2content(url)),
+        lambda: _jt_extractor(url=url), lambda: _content2text_te(_url2content(url))
     )
     assert isinstance(retval, str)
     return retval
 
 
 @extractor
+def _jt_extractor(*, url=None, html=None):
+    assert url or html
+    if html is None:
+        html = requests.get(url).content
+    paragraphs = justext(html, get_stoplist("English"))
+    return "\n\n".join([p.text for p in paragraphs if not p.is_boilerplate])
+
+
+@extractor
 def _html2text(html):
-    retval = _keep_first(
-        lambda: _bp_extractor(html=html).getText(),
-        lambda: BS.BeautifulSoup(html, "lxml").getText(),
-        lambda: " ".join(re.split(pattern="<.*?>", string=html)),
-    )
-    assert isinstance(retval, str)
-    return retval
+    return _jt_extractor(html=html)
 
 
 @extractor
@@ -153,11 +147,6 @@ def _content2text_te(content):
         fh.write(data)
         fh.flush()
         return textract.process(fh.name, encoding="utf-8").decode("utf-8")
-
-
-def _bp_extractor(**kwargs):
-    """Accepted args url or html"""
-    return Extractor(extractor="ArticleExtractor", **kwargs)
 
 
 @extractor
