@@ -127,10 +127,5 @@ def learn():
     model.fit(X=X, y=y)
     _set_model(model)
     log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
-    log.info(
-        "Cross Validation Score: {score}".format(
-            score=sorted(
-                cross_val_score(model, X, y, cv=10, scoring="accuracy", n_jobs=-1)
-            )
-        )
-    )
+    log.info("Cross Validation Score: {score}".format(score=model.scores_))
+    log.info("Regularization: best C ={C}, Cs = {Cs}".format(C=model.C_, Cs=model.Cs_))
