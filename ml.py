@@ -27,7 +27,12 @@ def get_model():
 
 def _new_model():
     return LogisticRegressionCV(
-        solver="sag", scoring="accuracy", verbose=0, n_jobs=1, cv=10
+        solver="sag",
+        scoring="accuracy",
+        verbose=0,
+        n_jobs=1,
+        cv=20,
+        class_weight="balanced",
     )
     # return sken.RandomForestClassifier(
     #     n_estimators=1000, oob_score=True, max_features=1, n_jobs=-1
