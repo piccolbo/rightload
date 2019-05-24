@@ -14,10 +14,13 @@ def proxy(url):
     log.info("Processing %s?%s", url, request.query_string)
     query_string = request.query_string.decode()
     if request.method == "GET":
-        parsed_feed = feedcache.Cache(feed_db()).fetch(
-            "?".join(filter(None, [url, query_string])), force_update=False
-        )  # defaults: force_update = False, offline = False
+        try:
+            parsed_feed = feedcache.Cache(feed_db()).fetch(
+                "?".join(filter(None, [url, query_string])), force_update=False
+            )  # defaults: force_update = False, offline = False
         # return content
+        finally:
+            feed_db().sync()
         status = parsed_feed.get("status", 404)
         if status >= 400:  # deal with errors
             response = ("External error", status, {})
