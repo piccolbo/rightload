@@ -10,7 +10,6 @@ import numpy as np
 # import sklearn.ensemble as sken
 
 from sklearn.linear_model import LogisticRegressionCV
-from sklearn.model_selection import cross_val_score
 
 _model_attr_name = "_model"
 
@@ -31,6 +30,7 @@ def _new_model():
         scoring="accuracy",
         verbose=0,
         n_jobs=1,
+        Cs=[1.0],
         cv=20,
         class_weight="balanced",
     )
