@@ -96,7 +96,7 @@ def _url2mat_or_None(url):
     except Exception:
         # del training_db()[url] this is too hasty, erasing valuable human
         # feedback
-        training_db().sync()
+        # training_db().sync()
         return None
 
 
