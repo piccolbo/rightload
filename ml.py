@@ -49,7 +49,7 @@ def _score_entry(entry):
                 url=url, e=e
             )
         )
-        raise
+        return None
 
 
 def score_feed(parsed_feed):

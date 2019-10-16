@@ -75,20 +75,21 @@ def _add_bar(text, mean_score, content_link):
 
 
 def _embedUI_entry(entry, score):
-    mean_score = score.mean()
-    # body = entry2text(entry)
-    body = _highlight_text(get_text(entry=entry), score)
-    # body = get_html(entry=entry)
-    # body = _highlight_html(html, text, score) #broken
-    url = get_url(entry)
-    if u"description" in entry:
-        entry[u"description"] = _add_bar(body, mean_score, url)
-    if u"content" in entry:
-        entry[u"content"][0].value = _add_bar(body, mean_score, url)
-    if u"title" in entry:
-        entry[u"title"] = u"{mean_score:} | {title}".format(
-            mean_score=int(mean_score * 100), title=entry[u"title"]
-        )
+    if score is not None:
+        mean_score = score.mean()
+        # body = entry2text(entry)
+        body = _highlight_text(get_text(entry=entry), score)
+        # body = get_html(entry=entry)
+        # body = _highlight_html(html, text, score) #broken
+        url = get_url(entry)
+        if u"description" in entry:
+            entry[u"description"] = _add_bar(body, mean_score, url)
+        if u"content" in entry:
+            entry[u"content"][0].value = _add_bar(body, mean_score, url)
+        if u"title" in entry:
+            entry[u"title"] = u"{mean_score:} | {title}".format(
+                mean_score=int(mean_score * 100), title=entry[u"title"]
+            )
     return entry
 
 
