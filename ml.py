@@ -120,13 +120,14 @@ def learn():
     log.info("Forming matrices")
     X = np.concatenate([z["X"] for z in Xy], axis=0)
     y = np.concatenate([z["y"] for z in Xy], axis=0)
+    w = np.concatenate([[1.0 / z["X"].shape[0]] * z["X"].shape[0] for z in Xy], axis=0)
     del Xy
     gc.collect()  # Trying to get as much RAM as possible before model fit
     log.info("Creating model")
     model = _new_model()
     log.info("Fitting model")
     log.info("Matrix size:" + str(X.shape))
-    model.fit(X=X, y=y)
+    model.fit(X=X, y=y, sample_weight=w)
     _set_model(model)
     log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
     log.info("Cross Validation Score: {score}".format(score=model.scores_))
