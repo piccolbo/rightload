@@ -44,8 +44,7 @@ def _font(color, text):
 def _span(text, color):
     # style = u'"border-bottom: 3px solid {color}"'
     # style = u'"text-decoration: underline; text-decoration-color: {color}"'
-    style = u'"background-color: {color};  line-height: auto"'
-    style = style.format(color=color)
+    style = u'"background-color: {color};  line-height: 1"'.format(color=color)
     return u"<span style={style}>{text}</span>".format(text=text, style=style)
 
 
@@ -136,7 +135,7 @@ def _highlight_text(text, score):
 
 def _highlight_sentence(sentence, score, rank):
     return _span(
-        u"<sup>{s:.2f}</sup> {x}".format(x=sentence, s=score), _score2color(rank)
+        u"<small>{s:.2f}</small> {x}".format(x=sentence, s=score), _score2color(rank)
     )
 
 
