@@ -1,15 +1,16 @@
 """ML component."""
-from feature_extraction import entry2mat, url2mat
 from content_extraction import get_url
 from datastores import training_db, model_db
+from feature_extraction import entry2mat, url2mat
 from flask import g
 import gc
 import logging as log
+
+# import mlflow
+# import mlflow.sklearn
 import numpy as np
-
-# import sklearn.ensemble as sken
-
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.neural_network import MLPClassifier
 
 _model_attr_name = "_model"
 
@@ -25,14 +26,8 @@ def get_model():
 
 
 def _new_model():
-    return LogisticRegressionCV(
-        solver="sag",
-        scoring="accuracy",
-        verbose=0,
-        n_jobs=1,
-        Cs=[1.0],
-        cv=20,
-        class_weight="balanced",
+    return MLPClassifier(
+        hidden_layer_sizes=(400, 400, 400), solver="sgd", early_stopping=False
     )
 
 
@@ -127,8 +122,10 @@ def learn():
     model = _new_model()
     log.info("Fitting model")
     log.info("Matrix size:" + str(X.shape))
-    model.fit(X=X, y=y, sample_weight=w)
+    model.fit(X=X, y=y)  # , sample_weight=w)
     _set_model(model)
     log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
-    log.info("Cross Validation Score: {score}".format(score=model.scores_))
-    log.info("Regularization: best C ={C}, Cs = {Cs}".format(C=model.C_, Cs=model.Cs_))
+    scores = cross_val_score(
+        model, X, y, n_jobs=-1, cv=StratifiedKFold(n_splits=10, shuffle=True)
+    )
+    log.info("Cross Validation Scores: {scores}".format(scores=scores))
