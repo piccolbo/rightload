@@ -19,7 +19,9 @@ import logging as log
 #
 
 # should be set at the project level
-log.basicConfig(filename="./log", level=log.INFO)
+log.basicConfig(
+    filename="./log", level=log.INFO, format="%(asctime)s %(levelname)s: %(message)s"
+)
 
 # create a Trace object, telling it what to ignore, and whether to
 # do tracing or line-counting or both.
