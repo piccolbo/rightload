@@ -5,9 +5,8 @@ from feature_extraction import entry2mat, url2mat
 from flask import g
 import gc
 import logging as log
-
-# import mlflow
-# import mlflow.sklearn
+import mlflow
+import mlflow.sklearn
 import numpy as np
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.neural_network import MLPClassifier
@@ -26,8 +25,11 @@ def get_model():
 
 
 def _new_model():
+    # 3 400 layer best so far
+    hidden_layer_sizes = (200, 200, 200)
+    mlflow.log_param("hidden layer sizes", hidden_layer_sizes)
     return MLPClassifier(
-        hidden_layer_sizes=(400, 400, 400), solver="sgd", early_stopping=False
+        hidden_layer_sizes=hidden_layer_sizes, solver="sgd", early_stopping=False
     )
 
 
@@ -40,7 +42,7 @@ def _score_entry(entry):
         return probs[:, 1]
     except Exception as e:
         log.error(
-            (u"Failed Scoring for {url}" + u" because of exception {e}").format(
+            ("Failed Scoring for {url}" + " because of exception {e}").format(
                 url=url, e=e
             )
         )
@@ -104,28 +106,39 @@ def learn():
         A message about the learning process containing a score.
 
     """
-    log.info("Loading data")
-    Xy = [
-        dict(X=X, y=[int(like)] * X.shape[0])
-        for X, like in [
-            (_url2mat_or_None(url), like) for url, like in training_db().items()
+    with mlflow.start_run():
+        log.info("Loading data")
+        training_db_items = training_db().items()
+        mlflow.log_param("Number of articles", len(training_db_items))
+        Xy = [
+            dict(X=X, y=[int(like)] * X.shape[0])
+            for X, like in [
+                (_url2mat_or_None(url), like) for url, like in training_db_items
+            ]
+            if (X is not None)
         ]
-        if (X is not None)
-    ]
-    log.info("Forming matrices")
-    X = np.concatenate([z["X"] for z in Xy], axis=0)
-    y = np.concatenate([z["y"] for z in Xy], axis=0)
-    w = np.concatenate([[1.0 / z["X"].shape[0]] * z["X"].shape[0] for z in Xy], axis=0)
-    del Xy
-    gc.collect()  # Trying to get as much RAM as possible before model fit
-    log.info("Creating model")
-    model = _new_model()
-    log.info("Fitting model")
-    log.info("Matrix size:" + str(X.shape))
-    model.fit(X=X, y=y)  # , sample_weight=w)
-    _set_model(model)
-    log.info("Classifier Score: {score}".format(score=model.score(X=X, y=y)))
-    scores = cross_val_score(
-        model, X, y, n_jobs=-1, cv=StratifiedKFold(n_splits=10, shuffle=True)
-    )
-    log.info("Cross Validation Scores: {scores}".format(scores=scores))
+        log.info("Forming matrices")
+        X = np.concatenate([z["X"] for z in Xy], axis=0)
+        y = np.concatenate([z["y"] for z in Xy], axis=0)
+        w = np.concatenate(
+            [[1.0 / z["X"].shape[0]] * z["X"].shape[0] for z in Xy], axis=0
+        )
+        del Xy
+        gc.collect()  # Trying to get as much RAM as possible before model fit
+        log.info("Creating model")
+        model = _new_model()
+        log.info("Fitting model")
+        log.info("Matrix size:" + str(X.shape))
+        mlflow.log_param("Number of sentences", X.shape[0])
+        model.fit(X=X, y=y)  # , sample_weight=w)
+        _set_model(model)
+        score = model.score(X=X, y=y)
+        log.info(f"Classifier Score: {score}")
+        mlflow.log_metric("score", score)
+        scores = cross_val_score(
+            model, X, y, n_jobs=-1, cv=StratifiedKFold(n_splits=10, shuffle=True)
+        )
+        mlflow.log_metric("Median CV score", np.median(scores))
+        mlflow.log_metric("IQR CV score", np.subtract(*np.percentile(scores, [75, 25])))
+        log.info("Cross Validation Scores: {scores}".format(scores=scores))
+    return '<h1>Done!</h1> run mlflow ui --port 5555 and go to <a href="http://127.0.0.1:5555">here</a> to check results'
