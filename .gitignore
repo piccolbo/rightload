@@ -12,3 +12,5 @@ log
 *.log
 feature-cache-basilica/*
 feature-cache-infersent/*
+
+mlruns/*
