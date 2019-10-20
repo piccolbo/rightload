@@ -80,8 +80,7 @@ def _feedback(feedback, url):
 
 @app.route("/learn")
 def _learn():
-    learn()
-    return ("Done", 204, {})
+    return (learn(), 200, {})
 
 
 @app.route("/preload")
