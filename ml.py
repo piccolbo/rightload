@@ -4,6 +4,7 @@ from datastores import training_db, model_db
 from feature_extraction import entry2mat, url2mat
 from flask import g
 import gc
+from gitpyhon import Repo
 import logging as log
 import mlflow
 import mlflow.sklearn
@@ -107,6 +108,8 @@ def learn():
 
     """
     with mlflow.start_run():
+        repo = Repo(".")
+        mlflow.log_param("commit", str(repo.head.commmit))
         log.info("Loading data")
         training_db_items = training_db().items()
         mlflow.log_param("Number of articles", len(training_db_items))
