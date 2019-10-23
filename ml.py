@@ -36,14 +36,8 @@ def get_model():
     return getattr(g, _model_attr_name, None) or model_db().get("user")
 
 
-def _new_model(hidden_layer_sizes, max_iter, alpha):
-    return MLPClassifier(
-        hidden_layer_sizes=hidden_layer_sizes,
-        solver="sgd",
-        max_iter=max_iter,
-        alpha=alpha,
-        verbose=True,
-    )
+def _new_model(*args, **kwargs):
+    return MLPClassifier(*args, **kwargs)
 
 
 def _score_entry(entry):
@@ -157,7 +151,7 @@ def learn():
 
 
 @_mlflow_run
-def _learn(hidden_layer_sizes, max_iter, alpha):
+def _learn(**kwargs):
     log.info("Loading data")
     training_db_items = training_db().items()
     mlflow.log_metric("Number of articles", len(training_db_items))
@@ -176,9 +170,7 @@ def _learn(hidden_layer_sizes, max_iter, alpha):
     del Xy
     gc.collect()  # Trying to get as much RAM as possible before model fit
     log.info("Creating model")
-    model = _new_model(
-        hidden_layer_sizes=hidden_layer_sizes, max_iter=max_iter, alpha=alpha
-    )
+    model = _new_model(**kwargs)
     log.info("Fitting model")
     log.info("Matrix size:" + str(X.shape))
     mlflow.log_metric("Number of sentences", X.shape[0])
