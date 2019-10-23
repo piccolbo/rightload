@@ -7,6 +7,7 @@ from functools import wraps
 import gc
 from git import Repo
 from inspect import signature
+import json
 import logging as log
 import mlflow
 import mlflow.sklearn
@@ -109,6 +110,8 @@ def _url2mat_or_None(url):
 
 
 class DirtyRepoException(Exception):
+    """Exception to be raised when learning is triggered in a dirty repo."""
+
     pass
 
 
@@ -138,8 +141,7 @@ def _mlflow_run(f, record_model=False):
     return wrapper
 
 
-@_mlflow_run
-def learn(hidden_layer_sizes=(50, 50, 50), alpha=0.1, max_iter=1000):
+def learn():
     """Trigger the learning process.
 
     Returns
@@ -148,6 +150,13 @@ def learn(hidden_layer_sizes=(50, 50, 50), alpha=0.1, max_iter=1000):
         A message about the learning process containing a score.
 
     """
+    with open("mlconf.json") as conf:
+        kwargs = json.load(conf)
+    return _learn(**kwargs)
+
+
+@_mlflow_run
+def _learn(hidden_layer_sizes, max_iter, alpha):
     log.info("Loading data")
     training_db_items = training_db().items()
     mlflow.log_metric("Number of articles", len(training_db_items))
