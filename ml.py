@@ -42,6 +42,7 @@ def _new_model(hidden_layer_sizes, max_iter, alpha):
         solver="sgd",
         max_iter=max_iter,
         alpha=alpha,
+        verbose=True,
     )
 
 
