@@ -112,7 +112,7 @@ class DirtyRepoException(Exception):
 
 def _mlflow_run(f, record_model=False):
     @wraps(f)
-    def wrapper(*args, **kwargs):
+    def wrapper(**kwargs):
         repo = Repo(".")
         if repo.is_dirty():
             log.error("repo is dirty, please check in all changes")
@@ -125,10 +125,10 @@ def _mlflow_run(f, record_model=False):
                     "Function name": f.__qualname__,
                 }
             )
-            bound_args = signature(f).bind(*args, **kwargs)
-            bound_args.apply_defaults()
-            mlflow.log_params(bound_args.arguments)
-            model = f(*args, **kwargs)
+            # bound_args = signature(f).bind(*args, **kwargs)
+            # bound_args.apply_defaults()
+            mlflow.log_params(**kwargs)
+            model = f(**kwargs)
             if record_model:
                 mlflow.log_model(model)
             return model
