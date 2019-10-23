@@ -170,6 +170,7 @@ def _learn(hidden_layer_sizes, max_iter, alpha):
     log.info("Forming matrices")
     X = np.concatenate([z["X"] for z in Xy], axis=0)
     y = np.concatenate([z["y"] for z in Xy], axis=0)
+    mlflow.log_metric("Positive proportion", sum(y) / len(y))
     # w = np.concatenate([[1.0 / z["X"].shape[0]] * z["X"].shape[0] for z in Xy], axis=0)
     del Xy
     gc.collect()  # Trying to get as much RAM as possible before model fit
