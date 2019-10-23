@@ -180,7 +180,7 @@ def _learn(**kwargs):
     log.info(f"Classifier Score: {score}")
     mlflow.log_metric("score", score)
     scores = cross_val_score(
-        model, X, y, n_jobs=-1, cv=StratifiedKFold(n_splits=10, shuffle=True)
+        model, X, y, n_jobs=-1, cv=StratifiedKFold(n_splits=10, shuffle=False)
     )
     mlflow.log_metric("Median CV score", np.median(scores))
     mlflow.log_metric("IQR CV score", np.subtract(*np.percentile(scores, [75, 25])))
