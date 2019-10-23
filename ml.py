@@ -139,7 +139,7 @@ def _mlflow_run(f, record_model=False):
 
 
 @_mlflow_run
-def learn(hidden_layer_sizes=(100, 100, 100), alpha=0.1, max_iter=1000):
+def learn(hidden_layer_sizes=(50, 50, 50), alpha=0.1, max_iter=1000):
     """Trigger the learning process.
 
     Returns
