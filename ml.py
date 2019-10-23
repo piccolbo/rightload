@@ -127,7 +127,7 @@ def _mlflow_run(f, record_model=False):
             )
             # bound_args = signature(f).bind(*args, **kwargs)
             # bound_args.apply_defaults()
-            mlflow.log_params(**kwargs)
+            mlflow.log_params(kwargs)
             model = f(**kwargs)
             if record_model:
                 mlflow.log_model(model)
