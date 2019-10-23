@@ -165,6 +165,9 @@ def _learn(**kwargs):
     log.info("Forming matrices")
     X = np.concatenate([z["X"] for z in Xy], axis=0)
     y = np.concatenate([z["y"] for z in Xy], axis=0)
+    perm = np.random.permutation(len(y))
+    X = X[perm, :]
+    y = y[perm]
     mlflow.log_metric("Positive proportion", sum(y) / len(y))
     # w = np.concatenate([[1.0 / z["X"].shape[0]] * z["X"].shape[0] for z in Xy], axis=0)
     del Xy
