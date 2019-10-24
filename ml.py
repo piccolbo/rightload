@@ -6,7 +6,6 @@ from flask import g
 from functools import wraps
 import gc
 from git import Repo
-from inspect import signature
 import json
 import logging as log
 import mlflow
@@ -118,9 +117,11 @@ def _mlflow_run(f, record_model=False):
             log.error("repo is dirty, please check in all changes")
             raise DirtyRepoException
         with mlflow.start_run():
+            comm = repo.head.commit
             mlflow.log_params(
                 {
-                    "commit": str(repo.head.commit),
+                    "commit": str(comm),
+                    "message": comm.message,
                     "Function module": f.__module__,
                     "Function name": f.__qualname__,
                 }
@@ -165,9 +166,6 @@ def _learn(**kwargs):
     log.info("Forming matrices")
     X = np.concatenate([z["X"] for z in Xy], axis=0)
     y = np.concatenate([z["y"] for z in Xy], axis=0)
-    perm = np.random.permutation(len(y))
-    X = X[perm, :]
-    y = y[perm]
     mlflow.log_metric("Positive proportion", sum(y) / len(y))
     # w = np.concatenate([[1.0 / z["X"].shape[0]] * z["X"].shape[0] for z in Xy], axis=0)
     del Xy
