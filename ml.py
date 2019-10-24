@@ -177,6 +177,7 @@ def _learn(**kwargs):
     mlflow.log_metric("Number of sentences", X.shape[0])
     model.fit(X=X, y=y)  # , sample_weight=w)
     _set_model(model)
+    mlflow.sklearn.log_model(model, "mlflow-model")
     score = model.score(X=X, y=y)
     log.info(f"Classifier Score: {score}")
     mlflow.log_metric("score", score)
@@ -185,5 +186,6 @@ def _learn(**kwargs):
     )
     mlflow.log_metric("Median CV score", np.median(scores))
     mlflow.log_metric("IQR CV score", np.subtract(*np.percentile(scores, [75, 25])))
+    mlflow.log_metric("CV scores", scores)
     log.info("Cross Validation Scores: {scores}".format(scores=scores))
     return model
