@@ -186,6 +186,6 @@ def _learn(**kwargs):
     )
     mlflow.log_metric("Median CV score", np.median(scores))
     mlflow.log_metric("IQR CV score", np.subtract(*np.percentile(scores, [75, 25])))
-    mlflow.log_metric("CV scores", scores)
+    [mlflow.log_metric("CV scores", s, step=1) for i, s in scores]
     log.info("Cross Validation Scores: {scores}".format(scores=scores))
     return model
