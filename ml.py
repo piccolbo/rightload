@@ -181,6 +181,7 @@ def _learn(**kwargs):
     score = model.score(X=X, y=y)
     log.info(f"Classifier Score: {score}")
     mlflow.log_metric("score", score)
+    [mlflow.log_metric("loss curve", l, i) for i, l in enumerate(model.loss_curve_)]
     scores = cross_val_score(
         model, X, y, n_jobs=-1, cv=StratifiedKFold(n_splits=10, shuffle=False)
     )
