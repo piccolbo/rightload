@@ -80,7 +80,12 @@ def _feedback(feedback, url):
 
 @app.route("/learn")
 def _learn():
-    return (learn(), 200, {})
+    learn()
+    return (
+        '<h1>Done!</h1> run mlflow ui --port 5555 and go to <a href="http://127.0.0.1:5555">here</a> to check results',
+        200,
+        {},
+    )
 
 
 @app.route("/preload")
